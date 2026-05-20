@@ -1,32 +1,29 @@
 import { NextRequest, NextResponse } from "next/server"
 import { fal } from "@fal-ai/client"
+import { pixelProcess } from "@/lib/pixel-process"
 
 // Configure fal client with server-side key
 fal.config({ credentials: process.env.FAL_KEY })
 
-// Pixel art style LoRA — trained specifically for crisp sprites
-const PIXEL_ART_LORA =
-  "https://huggingface.co/alvdansen/littletinies/resolve/main/littletinies.safetensors"
-
 // Map user-facing sizes to generation sizes
-// We generate at 2x then downsample for crisp pixels
+// We generate at a high resolution, then downsample with nearest-neighbor
 const SIZE_MAP: Record<string, { gen: number; out: number }> = {
-  "16x16":  { gen: 512,  out: 16  },
-  "32x32":  { gen: 512,  out: 32  },
-  "64x64":  { gen: 512,  out: 64  },
-  "128x128":{ gen: 768,  out: 128 },
-  "256x256":{ gen: 1024, out: 256 },
+  "16x16":   { gen: 512,  out: 16  },
+  "32x32":   { gen: 512,  out: 32  },
+  "64x64":   { gen: 512,  out: 64  },
+  "128x128": { gen: 768,  out: 128 },
+  "256x256": { gen: 1024, out: 256 },
 }
 
-// Palettes (hex colors — used in prompt reinforcement)
+// Prompt hints per palette (reinforce color constraints in the prompt)
 const PALETTE_PROMPTS: Record<string, string> = {
-  "default":     "pixel art sprite, clean pixel art style, game asset",
-  "gameboy":     "gameboy palette, 4 colors, green tones, pixel art",
-  "nes":         "NES palette, retro 8-bit pixel art, limited colors",
-  "snes":        "SNES 16-bit pixel art, vibrant colors, classic RPG style",
-  "pico8":       "PICO-8 palette, 16 colors, retro pixel art",
-  "endesga32":   "pixel art, 32 color palette, indie game style",
-  "monokai":     "dark pixel art, monokai colors, cyberpunk style",
+  "default":   "pixel art sprite, clean pixel art style, game asset",
+  "gameboy":   "gameboy palette, 4 colors, green monochrome tones, pixel art",
+  "nes":       "NES palette, retro 8-bit pixel art, limited colors",
+  "snes":      "SNES 16-bit pixel art, vibrant colors, classic RPG style",
+  "pico8":     "PICO-8 palette, 16 colors, retro pixel art",
+  "endesga32": "pixel art, 32 color palette, indie game style",
+  "monokai":   "dark pixel art, monokai colors, cyberpunk style",
 }
 
 export async function POST(req: NextRequest) {
@@ -75,7 +72,7 @@ export async function POST(req: NextRequest) {
       "high resolution, detailed texture, noise, grain",
     ].join(", ")
 
-    // Call fal.ai — Flux Schnell (fast + good for pixel art)
+    // ── Step 1: Generate with fal.ai Flux Schnell ────────────────────────────
     const result = await fal.run("fal-ai/flux/schnell", {
       input: {
         prompt: fullPrompt,
@@ -99,8 +96,10 @@ export async function POST(req: NextRequest) {
 
     const generatedImageUrl = result.images[0].url
 
-    // Remove background using fal.ai bria-rmbg
-    let finalImageUrl = generatedImageUrl
+    // ── Step 2: Optional background removal ─────────────────────────────────
+    // Run BEFORE pixel processing so bria-rmbg works on the full-res image
+    // (background removal on a 16px sprite would be unreliable)
+    let imageUrlForProcessing = generatedImageUrl
     if (removeBackground) {
       try {
         const bgResult = await fal.run("fal-ai/bria/background/remove", {
@@ -109,21 +108,37 @@ export async function POST(req: NextRequest) {
           },
         }) as { image: { url: string } }
         if (bgResult.image?.url) {
-          finalImageUrl = bgResult.image.url
+          imageUrlForProcessing = bgResult.image.url
         }
       } catch (bgError) {
-        // Background removal failed — use original image
+        // Background removal failed — continue with original
         console.warn("Background removal failed, using original:", bgError)
       }
     }
 
+    // ── Step 3: Grid Snapping + Color Quantization ───────────────────────────
+    // Download → nearest-neighbor resize → palette clamp → PNG base64
+    let finalImageUrl: string
+    try {
+      finalImageUrl = await pixelProcess(
+        imageUrlForProcessing,
+        sizeConfig.out,   // e.g. 64 for "64x64"
+        palette           // e.g. "pico8"
+      )
+    } catch (processError) {
+      // If post-processing fails, fall back to the raw URL
+      console.warn("Pixel processing failed, returning raw URL:", processError)
+      finalImageUrl = imageUrlForProcessing
+    }
+
     return NextResponse.json({
       success: true,
-      imageUrl: finalImageUrl,
-      originalUrl: generatedImageUrl,
+      imageUrl: finalImageUrl,         // processed base64 PNG (or fallback URL)
+      originalUrl: generatedImageUrl,  // raw fal.ai URL (for debugging)
       prompt: fullPrompt,
       size: size,
       palette: palette,
+      processed: finalImageUrl.startsWith("data:"), // true = grid snap + quantize applied
     })
 
   } catch (error: unknown) {
