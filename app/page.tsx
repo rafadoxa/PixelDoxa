@@ -22,7 +22,7 @@ import { Sparkles, Wand2, Grid3X3, Layers, Gamepad2, ArrowRight, Zap, Check, Sta
 import { Button } from "@/components/ui/button"
 
 export default function PixelDoxaApp() {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [activeTool, setActiveTool] = useState(t.sidebar.tools[0])
@@ -38,11 +38,12 @@ export default function PixelDoxaApp() {
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           isDarkMode={isDarkMode}
           toggleDarkMode={toggleDarkMode}
+          onOpenApp={() => setShowLanding(false)}
         />
         
         <main className="pt-16">
           {/* Hero */}
-          <HeroSection />
+          <HeroSection onOpenApp={() => setShowLanding(false)} />
           
           {/* Workflow Section */}
           <PixelDoxaWorkflow />
@@ -149,11 +150,13 @@ export default function PixelDoxaApp() {
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Assets em{" "}
-                  <span className="text-accent">tempo real</span>
+                  {lang === "pt" ? "Assets em" : "Assets in"}{" "}
+                  <span className="text-accent">{lang === "pt" ? "tempo real" : "real time"}</span>
                 </h2>
                 <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-                  Preview instantaneo de sprites, animacoes e elementos de cenario
+                  {lang === "pt"
+                    ? "Prévia instantânea de sprites, animações e elementos de cenário"
+                    : "Instant preview of sprites, animations and scene elements"}
                 </p>
               </div>
               
@@ -447,7 +450,7 @@ export default function PixelDoxaApp() {
               onClick={() => setShowLanding(true)}
               className="hover:text-foreground transition-colors"
             >
-              Início
+              {lang === "pt" ? "Início" : "Home"}
             </button>
             <span>/</span>
             <span className="text-foreground">{activeTool}</span>

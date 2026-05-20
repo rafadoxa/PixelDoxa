@@ -47,42 +47,29 @@ const LAYERS = [
   { id: "vfx", name: "VFX", visible: true, locked: false },
 ]
 
-// Features to highlight
-const PIPELINE_FEATURES = [
-  {
-    icon: Sparkles,
-    title: "Text-to-Animation",
-    description: "Descreva a animacao e gere frames consistentes automaticamente"
-  },
-  {
-    icon: Target,
-    title: "Character Coherence",
-    description: "Mantenha consistencia visual entre todos os frames gerados"
-  },
-  {
-    icon: RefreshCw,
-    title: "Regenerate Frames",
-    description: "Regenere frames individuais sem afetar o resto da animacao"
-  },
-  {
-    icon: Upload,
-    title: "Upload Concepts",
-    description: "Importe seus proprios designs e gere animacoes a partir deles"
-  },
-  {
-    icon: Grid3X3,
-    title: "Spritesheet Export",
-    description: "Exporte spritesheets otimizados para qualquer game engine"
-  },
-  {
-    icon: Layers,
-    title: "Layer System",
-    description: "Edite camadas separadas: corpo, roupa, armas, efeitos"
-  },
-]
+// Features to highlight — bilingual
+const PIPELINE_FEATURES = {
+  en: [
+    { icon: Sparkles,  title: "Text-to-Animation",   description: "Describe the animation and automatically generate consistent frames" },
+    { icon: Target,    title: "Character Coherence",  description: "Maintain visual consistency across all generated frames" },
+    { icon: RefreshCw, title: "Regenerate Frames",    description: "Regenerate individual frames without affecting the rest of the animation" },
+    { icon: Upload,    title: "Upload Concepts",      description: "Import your own designs and generate animations from them" },
+    { icon: Grid3X3,   title: "Spritesheet Export",   description: "Export optimized spritesheets for any game engine" },
+    { icon: Layers,    title: "Layer System",         description: "Edit separate layers: body, clothing, weapons, effects" },
+  ],
+  pt: [
+    { icon: Sparkles,  title: "Text-to-Animation",   description: "Descreva a animação e gere frames consistentes automaticamente" },
+    { icon: Target,    title: "Coerência de Personagem", description: "Mantenha consistência visual entre todos os frames gerados" },
+    { icon: RefreshCw, title: "Regenerar Frames",    description: "Regenere frames individuais sem afetar o resto da animação" },
+    { icon: Upload,    title: "Upload de Conceitos",  description: "Importe seus próprios designs e gere animações a partir deles" },
+    { icon: Grid3X3,   title: "Exportar Spritesheet",description: "Exporte spritesheets otimizados para qualquer game engine" },
+    { icon: Layers,    title: "Sistema de Camadas",   description: "Edite camadas separadas: corpo, roupa, armas, efeitos" },
+  ],
+}
 
 export function AnimationPipeline() {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
+  const features = PIPELINE_FEATURES[lang] ?? PIPELINE_FEATURES.en
   const [selectedAnimation, setSelectedAnimation] = useState(ANIMATION_TYPES[2]) // Attack
   const [currentFrame, setCurrentFrame] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
@@ -462,7 +449,7 @@ export function AnimationPipeline() {
           transition={{ delay: 0.4 }}
           className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-          {PIPELINE_FEATURES.map((feature, i) => (
+          {features.map((feature, i) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 20 }}
@@ -490,7 +477,7 @@ export function AnimationPipeline() {
         >
           <div className="text-center mb-8">
             <h3 className="text-2xl font-bold mb-2">Spritesheet Export</h3>
-            <p className="text-muted-foreground">Exporte animacoes completas em formato otimizado para sua engine</p>
+            <p className="text-muted-foreground">{lang === "pt" ? "Exporte animações completas em formato otimizado para sua engine" : "Export complete animations in an optimized format for your engine"}</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

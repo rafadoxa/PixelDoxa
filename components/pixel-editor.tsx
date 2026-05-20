@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useLanguage } from "@/lib/language-context"
 import { motion } from "framer-motion"
 import { 
   Pencil, 
@@ -53,6 +54,7 @@ interface Layer {
 }
 
 export function PixelEditor() {
+  const { lang } = useLanguage()
   const [activeTool, setActiveTool] = useState("pencil")
   const [selectedColor, setSelectedColor] = useState("#fff1e8")
   const [brushSize, setBrushSize] = useState([1])
@@ -133,7 +135,7 @@ export function PixelEditor() {
               }}
             >
               <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-xs">
-                Clique para desenhar
+                {lang === "pt" ? "Clique para desenhar" : "Click to draw"}
               </div>
             </div>
           </div>
@@ -142,7 +144,7 @@ export function PixelEditor() {
           <div className="border-t border-border p-3 space-y-3">
             {/* Brush Size */}
             <div className="flex items-center gap-3">
-              <Label className="text-xs w-20">Tamanho:</Label>
+              <Label className="text-xs w-20">{lang === "pt" ? "Tamanho:" : "Brush:"}</Label>
               <Slider 
                 value={brushSize} 
                 onValueChange={setBrushSize} 
@@ -207,7 +209,7 @@ export function PixelEditor() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium flex items-center gap-1">
                 <Layers className="w-3 h-3" />
-                Camadas
+                {lang === "pt" ? "Camadas" : "Layers"}
               </span>
               <Button variant="ghost" size="icon" className="h-5 w-5">
                 <Plus className="w-3 h-3" />

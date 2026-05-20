@@ -53,84 +53,44 @@ const ENGINES = [
   },
 ]
 
-// Workflow step data
-const WORKFLOW_STEPS = [
-  {
-    id: 1,
-    title: "Conceito",
-    subtitle: "Visao Criativa",
-    description: "Defina a estetica do seu jogo - genero, atmosfera, referencias visuais",
-    icon: Lightbulb,
-    color: "#FFB347",
-    preview: "concept",
-  },
-  {
-    id: 2,
-    title: "Prompt IA",
-    subtitle: "Descricao Detalhada",
-    description: "Descreva seus assets com precisao - estilo, cores, poses, animacoes",
-    icon: MessageSquareText,
-    color: "#87CEEB",
-    preview: "prompt",
-  },
-  {
-    id: 3,
-    title: "Personagens",
-    subtitle: "Sprite Generation",
-    description: "A IA gera personagens unicos com variacoes, expressoes e poses",
-    icon: Users,
-    color: "#98D8C8",
-    preview: "characters",
-  },
-  {
-    id: 4,
-    title: "Animacao",
-    subtitle: "SpriteSheet Pro",
-    description: "Crie walk cycles, ataques, idle animations e efeitos especiais",
-    icon: Film,
-    color: "#DDA0DD",
-    preview: "animation",
-  },
-  {
-    id: 5,
-    title: "Tilesets",
-    subtitle: "Seamless Tiles",
-    description: "Gere tiles que conectam perfeitamente - florestas, dungeons, vilas",
-    icon: Grid3X3,
-    color: "#90EE90",
-    preview: "tilesets",
-  },
-  {
-    id: 6,
-    title: "Mundos",
-    subtitle: "Procedural Gen",
-    description: "Use WFC para gerar mapas completos com biomas e estruturas",
-    icon: Globe,
-    color: "#F0E68C",
-    preview: "worlds",
-  },
-  {
-    id: 7,
-    title: "Exportar",
-    subtitle: "Game-Ready",
-    description: "Exporte para Godot, Unity, GameMaker, RPG Maker e mais",
-    icon: Download,
-    color: "#87CEFA",
-    preview: "export",
-  },
-]
+// Workflow step data — bilingual
+const WORKFLOW_STEPS_DATA = {
+  en: [
+    { id: 1, title: "Concept",     subtitle: "Creative Vision",   description: "Define your game's aesthetic — genre, atmosphere, visual references",              icon: Lightbulb,        color: "#FFB347", preview: "concept"    },
+    { id: 2, title: "AI Prompt",   subtitle: "Detailed Brief",    description: "Describe your assets precisely — style, colors, poses, animations",               icon: MessageSquareText, color: "#87CEEB", preview: "prompt"     },
+    { id: 3, title: "Characters",  subtitle: "Sprite Generation", description: "AI generates unique characters with variations, expressions and poses",            icon: Users,            color: "#98D8C8", preview: "characters" },
+    { id: 4, title: "Animation",   subtitle: "SpriteSheet Pro",   description: "Create walk cycles, attacks, idle animations and special effects",                 icon: Film,             color: "#DDA0DD", preview: "animation"  },
+    { id: 5, title: "Tilesets",    subtitle: "Seamless Tiles",    description: "Generate tiles that connect perfectly — forests, dungeons, villages",              icon: Grid3X3,          color: "#90EE90", preview: "tilesets"   },
+    { id: 6, title: "Worlds",      subtitle: "Procedural Gen",    description: "Use WFC to generate complete maps with biomes and structures",                     icon: Globe,            color: "#F0E68C", preview: "worlds"     },
+    { id: 7, title: "Export",      subtitle: "Game-Ready",        description: "Export to Godot, Unity, GameMaker, RPG Maker and more",                           icon: Download,         color: "#87CEFA", preview: "export"     },
+  ],
+  pt: [
+    { id: 1, title: "Conceito",    subtitle: "Visão Criativa",    description: "Defina a estética do seu jogo — gênero, atmosfera, referências visuais",          icon: Lightbulb,        color: "#FFB347", preview: "concept"    },
+    { id: 2, title: "Prompt IA",   subtitle: "Descrição Detalhada", description: "Descreva seus assets com precisão — estilo, cores, poses, animações",           icon: MessageSquareText, color: "#87CEEB", preview: "prompt"     },
+    { id: 3, title: "Personagens", subtitle: "Sprite Generation", description: "A IA gera personagens únicos com variações, expressões e poses",                  icon: Users,            color: "#98D8C8", preview: "characters" },
+    { id: 4, title: "Animação",    subtitle: "SpriteSheet Pro",   description: "Crie walk cycles, ataques, idle animations e efeitos especiais",                  icon: Film,             color: "#DDA0DD", preview: "animation"  },
+    { id: 5, title: "Tilesets",    subtitle: "Seamless Tiles",    description: "Gere tiles que conectam perfeitamente — florestas, dungeons, vilas",              icon: Grid3X3,          color: "#90EE90", preview: "tilesets"   },
+    { id: 6, title: "Mundos",      subtitle: "Geração Procedural",description: "Use WFC para gerar mapas completos com biomas e estruturas",                      icon: Globe,            color: "#F0E68C", preview: "worlds"     },
+    { id: 7, title: "Exportar",    subtitle: "Game-Ready",        description: "Exporte para Godot, Unity, GameMaker, RPG Maker e mais",                          icon: Download,         color: "#87CEFA", preview: "export"     },
+  ],
+}
+
+// Shared step type
+type WorkflowStepData = typeof WORKFLOW_STEPS_DATA.en[0]
 
 // Step card component
 function WorkflowStep({ 
   step, 
   index, 
   isActive, 
-  onClick 
+  onClick,
+  totalSteps,
 }: { 
-  step: typeof WORKFLOW_STEPS[0]; 
-  index: number;
-  isActive: boolean;
-  onClick: () => void;
+  step: WorkflowStepData
+  index: number
+  isActive: boolean
+  onClick: () => void
+  totalSteps: number
 }) {
   const Icon = step.icon
   
@@ -144,7 +104,7 @@ function WorkflowStep({
       onClick={onClick}
     >
       {/* Connection line to next step */}
-      {index < WORKFLOW_STEPS.length - 1 && (
+      {index < totalSteps - 1 && (
         <div className="hidden lg:block absolute top-8 left-[calc(50%+2rem)] w-[calc(100%-1rem)] h-0.5">
           <div className="h-full bg-border" />
           <motion.div 
@@ -206,8 +166,8 @@ function WorkflowStep({
 }
 
 // Preview panel for each step
-function StepPreview({ activeStep }: { activeStep: number }) {
-  const step = WORKFLOW_STEPS[activeStep]
+function StepPreview({ activeStep, steps }: { activeStep: number; steps: WorkflowStepData[] }) {
+  const step = steps[activeStep]
   const [isPlaying, setIsPlaying] = useState(true)
   
   const renderPreview = () => {
@@ -357,7 +317,7 @@ function StepPreview({ activeStep }: { activeStep: number }) {
             <div className="flex items-center justify-between p-4 border-b border-border">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-accent" />
-                <span className="text-sm font-medium">Personagens Gerados</span>
+                <span className="text-sm font-medium">{lang === "pt" ? "Personagens Gerados" : "Characters Generated"}</span>
               </div>
               <motion.div
                 className="flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20"
@@ -742,7 +702,8 @@ function StepPreview({ activeStep }: { activeStep: number }) {
 }
 
 export function PixelDoxaWorkflow() {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
+  const WORKFLOW_STEPS = WORKFLOW_STEPS_DATA[lang] ?? WORKFLOW_STEPS_DATA.en
   const [activeStep, setActiveStep] = useState(0)
   
   return (
@@ -760,7 +721,7 @@ export function PixelDoxaWorkflow() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 mb-6">
             <Layers className="w-4 h-4 text-accent" />
-            <span className="text-sm text-accent font-medium">Workflow Completo</span>
+            <span className="text-sm text-accent font-medium">{lang === "pt" ? "Workflow Completo" : "Complete Workflow"}</span>
           </div>
           <h2 className="text-3xl lg:text-5xl font-bold mb-4">
             From Concept to <span className="text-accent">Game-Ready</span>
@@ -780,6 +741,7 @@ export function PixelDoxaWorkflow() {
               index={index}
               isActive={activeStep === index}
               onClick={() => setActiveStep(index)}
+              totalSteps={WORKFLOW_STEPS.length}
             />
           ))}
         </div>
@@ -792,7 +754,7 @@ export function PixelDoxaWorkflow() {
           viewport={{ once: true }}
           style={{ minHeight: "500px" }}
         >
-          <StepPreview activeStep={activeStep} />
+          <StepPreview activeStep={activeStep} steps={WORKFLOW_STEPS} />
         </motion.div>
         
         {/* Navigation dots */}

@@ -16,9 +16,10 @@ interface TopNavbarProps {
   onMenuClick: () => void
   isDarkMode: boolean
   toggleDarkMode: () => void
+  onOpenApp?: () => void
 }
 
-export function TopNavbar({ onMenuClick, isDarkMode, toggleDarkMode }: TopNavbarProps) {
+export function TopNavbar({ onMenuClick, isDarkMode, toggleDarkMode, onOpenApp }: TopNavbarProps) {
   const { lang, setLang, t } = useLanguage()
 
   const navLinks = [
@@ -167,9 +168,18 @@ export function TopNavbar({ onMenuClick, isDarkMode, toggleDarkMode }: TopNavbar
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {onOpenApp && (
+          <Button
+            onClick={onOpenApp}
+            variant="outline"
+            className="hidden sm:flex border-accent/50 text-accent hover:bg-accent/10 gap-2"
+          >
+            {lang === "pt" ? "Abrir App" : "Open App"}
+          </Button>
+        )}
         <Button className="hidden sm:flex bg-accent hover:bg-accent/90 text-accent-foreground glow-accent gap-2">
           <Sparkles className="w-4 h-4" />
-          Upgrade Pro
+          {lang === "pt" ? "Upgrade Pro" : "Upgrade Pro"}
         </Button>
       </div>
     </motion.header>

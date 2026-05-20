@@ -5,7 +5,11 @@ import { Sparkles, Wand2, Play, ChevronRight, Zap, Layers, Grid3X3, Star, Downlo
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 
-export function HeroSection() {
+interface HeroSectionProps {
+  onOpenApp?: () => void
+}
+
+export function HeroSection({ onOpenApp }: HeroSectionProps) {
   return (
     <section className="relative min-h-[100vh] flex items-center overflow-hidden">
       {/* Cinematic Pixel Art Background */}
@@ -193,7 +197,8 @@ export function HeroSection() {
           >
             <Button
               size="lg"
-              className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/30 group px-8 h-14 text-lg relative overflow-hidden"
+              onClick={onOpenApp}
+              className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg shadow-accent/30 group px-8 h-14 text-lg relative overflow-hidden cursor-pointer"
             >
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
@@ -207,10 +212,11 @@ export function HeroSection() {
             <Button
               size="lg"
               variant="outline"
-              className="border-border/50 bg-background/40 backdrop-blur-md hover:bg-secondary/80 hover:border-accent/30 group h-14 text-lg transition-all"
+              onClick={onOpenApp}
+              className="border-border/50 bg-background/40 backdrop-blur-md hover:bg-secondary/80 hover:border-accent/30 group h-14 text-lg transition-all cursor-pointer"
             >
               <Play className="w-5 h-5 mr-2" />
-              View Showcase
+              Open App
             </Button>
           </motion.div>
 
