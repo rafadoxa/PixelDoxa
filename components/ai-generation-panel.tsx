@@ -4,7 +4,8 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Sparkles, Wand2, RefreshCw, Download, Check,
-  AlertCircle, ImageIcon, Zap, Loader2, ExternalLink, WalletMinimal
+  AlertCircle, ImageIcon, Zap, Loader2, ExternalLink,
+  WalletMinimal, Clock, Gauge, Crown,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -19,7 +20,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useLanguage } from "@/lib/language-context"
 
-// ── Config ────────────────────────────────────────────────────
+// ── Config ─────────────────────────────────────────────────────────────────
 const SIZES = ["16x16", "32x32", "64x64", "128x128", "256x256"]
 
 const PALETTES = [
@@ -49,7 +50,9 @@ const EXAMPLE_PROMPTS = [
   "Ancient stone dungeon floor tile, mossy",
 ]
 
-// ── Component ─────────────────────────────────────────────────
+type Tier = "free" | "pro"
+
+// ── Component ───────────────────────────────────────────────────────────────
 export function AIGenerationPanel() {
   const { lang } = useLanguage()
 
@@ -58,27 +61,31 @@ export function AIGenerationPanel() {
   const [palette, setPalette]                   = useState("default")
   const [spriteType, setSpriteType]             = useState("character")
   const [removeBackground, setRemoveBackground] = useState(true)
+  const [tier, setTier]                         = useState<Tier>("free")
 
   const [isGenerating, setIsGenerating]         = useState(false)
   const [generatedImage, setGeneratedImage]     = useState<string | null>(null)
   const [error, setError]                       = useState<string | null>(null)
   const [copied, setCopied]                     = useState(false)
   const [generationTime, setGenerationTime]     = useState<number | null>(null)
-  const [errorType, setErrorType]               = useState<"balance" | "key" | "timeout" | "generic" | null>(null)
+  const [usedProvider, setUsedProvider]         = useState<string | null>(null)
+  const [errorType, setErrorType]               = useState<"balance" | "timeout" | "generic" | null>(null)
 
   const selectedPaletteData = PALETTES.find(p => p.id === palette) || PALETTES[0]
 
-  // ── Classify API errors into user-friendly types ──
-  const classifyError = (message: string): "balance" | "key" | "timeout" | "generic" => {
-    const m = message.toLowerCase()
-    if (m.includes("exhausted") || m.includes("balance") || m.includes("billing") || m.includes("locked")) return "balance"
-    if (m.includes("forbidden") || m.includes("401") || m.includes("403") || m.includes("unauthorized") || m.includes("invalid key")) return "balance" // forbidden = expired/empty balance
+  // ── Classify errors ────────────────────────────────────────────────────
+  const classifyError = (msg: string): "balance" | "timeout" | "generic" => {
+    const m = msg.toLowerCase()
+    if (
+      m.includes("exhausted") || m.includes("balance") || m.includes("billing") ||
+      m.includes("locked") || m.includes("forbidden") || m.includes("403") ||
+      m.includes("unauthorized") || m.includes("401")
+    ) return "balance"
     if (m.includes("timeout") || m.includes("timed out")) return "timeout"
-    if (m.includes("key") || m.includes("credentials")) return "key"
     return "generic"
   }
 
-  // ── Generate ──
+  // ── Generate ───────────────────────────────────────────────────────────
   const handleGenerate = async () => {
     if (!prompt.trim()) return
     setIsGenerating(true)
@@ -86,18 +93,27 @@ export function AIGenerationPanel() {
     setErrorType(null)
     setGeneratedImage(null)
     setGenerationTime(null)
+    setUsedProvider(null)
     const start = Date.now()
 
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, size, palette, style: spriteType, removeBackground }),
+        body: JSON.stringify({
+          prompt,
+          size,
+          palette,
+          style: spriteType,
+          removeBackground,
+          tier,
+        }),
       })
       const data = await res.json()
       if (!res.ok || !data.success) throw new Error(data.error || "Generation failed")
       setGeneratedImage(data.imageUrl)
       setGenerationTime(Math.round((Date.now() - start) / 1000))
+      setUsedProvider(data.provider ?? tier)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Something went wrong"
       setError(msg)
@@ -122,6 +138,40 @@ export function AIGenerationPanel() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // ── Tier descriptions ──────────────────────────────────────────────────
+  const tierInfo = {
+    free: {
+      label:    lang === "pt" ? "Grátis" : "Free",
+      speed:    lang === "pt" ? "~15-30s" : "~15-30s",
+      desc:     lang === "pt" ? "Pollinations.ai · Sem custo · Ilimitado" : "Pollinations.ai · No cost · Unlimited",
+      bgColor:  "bg-emerald-500/10",
+      border:   "border-emerald-500/30",
+      text:     "text-emerald-400",
+      icon:     Zap,
+    },
+    pro: {
+      label:    lang === "pt" ? "Pro" : "Pro",
+      speed:    lang === "pt" ? "~3-5s" : "~3-5s",
+      desc:     lang === "pt" ? "fal.ai · Remoção de fundo · Mais rápido" : "fal.ai · Background removal · Faster",
+      bgColor:  "bg-violet-500/10",
+      border:   "border-violet-500/30",
+      text:     "text-violet-400",
+      icon:     Crown,
+    },
+  }
+
+  const currentTier = tierInfo[tier]
+  const TierIcon = currentTier.icon
+
+  // ── Loading messages by tier ───────────────────────────────────────────
+  const loadingSteps = tier === "free"
+    ? (lang === "pt"
+        ? ["Conectando ao Pollinations.ai...", "Gerando pixel art...", "Aplicando paleta...", "Quase pronto..."]
+        : ["Connecting to Pollinations.ai...", "Generating pixel art...", "Applying palette...", "Almost done..."])
+    : (lang === "pt"
+        ? ["Conectando ao fal.ai...", "Gerando com Flux Schnell...", "Removendo fundo...", "Processando pixels..."]
+        : ["Connecting to fal.ai...", "Generating with Flux Schnell...", "Removing background...", "Processing pixels..."])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -138,7 +188,9 @@ export function AIGenerationPanel() {
           <div>
             <h3 className="text-sm font-semibold">AI Generation Panel</h3>
             <p className="text-xs text-muted-foreground">
-              {lang === "pt" ? "IA real — fal.ai + Flux" : "Real AI — fal.ai + Flux"}
+              {tier === "free"
+                ? (lang === "pt" ? "Grátis · Pollinations.ai + Flux" : "Free · Pollinations.ai + Flux")
+                : (lang === "pt" ? "Pro · fal.ai + Flux Schnell" : "Pro · fal.ai + Flux Schnell")}
             </p>
           </div>
         </div>
@@ -149,6 +201,65 @@ export function AIGenerationPanel() {
       </div>
 
       <div className="p-4 space-y-4">
+
+        {/* ── FREE / PRO Tier Selector ── */}
+        <div className="grid grid-cols-2 gap-2">
+          {(["free", "pro"] as Tier[]).map((t) => {
+            const info = tierInfo[t]
+            const Icon = info.icon
+            const isActive = tier === t
+            return (
+              <button
+                key={t}
+                onClick={() => setTier(t)}
+                className={cn(
+                  "relative flex flex-col items-start p-3 rounded-xl border-2 transition-all text-left",
+                  isActive
+                    ? `${info.bgColor} ${info.border}`
+                    : "border-border bg-secondary/20 hover:border-muted-foreground/50"
+                )}
+              >
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Icon className={cn("w-3.5 h-3.5", isActive ? info.text : "text-muted-foreground")} />
+                  <span className={cn("text-xs font-bold", isActive ? info.text : "text-muted-foreground")}>
+                    {info.label}
+                  </span>
+                  <div className="flex items-center gap-0.5 ml-auto">
+                    <Clock className="w-2.5 h-2.5 text-muted-foreground" />
+                    <span className="text-[9px] text-muted-foreground">{info.speed}</span>
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground leading-snug">{info.desc}</p>
+                {isActive && (
+                  <motion.div
+                    layoutId="tier-active"
+                    className={cn("absolute bottom-1.5 right-1.5 w-1.5 h-1.5 rounded-full", info.text.replace("text-", "bg-"))}
+                  />
+                )}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Pro info note */}
+        {tier === "pro" && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="flex items-start gap-2 p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/20 text-[10px] text-muted-foreground"
+          >
+            <WalletMinimal className="w-3 h-3 text-violet-400 shrink-0 mt-0.5" />
+            <span>
+              {lang === "pt"
+                ? "Pro usa fal.ai (pago). Configure FAL_KEY no Vercel + créditos em "
+                : "Pro uses fal.ai (paid). Configure FAL_KEY in Vercel + add credits at "}
+              <a href="https://fal.ai/dashboard/billing" target="_blank" rel="noopener noreferrer"
+                className="text-violet-400 hover:underline">
+                fal.ai/dashboard/billing
+              </a>
+            </span>
+          </motion.div>
+        )}
 
         {/* ── Prompt ── */}
         <div className="space-y-2">
@@ -249,25 +360,34 @@ export function AIGenerationPanel() {
           </div>
         </div>
 
-        {/* ── Remove Background toggle ── */}
+        {/* ── Remove Background toggle (Pro only note) ── */}
         <div className="flex items-center justify-between py-1">
           <div>
-            <p className="text-xs font-medium">
+            <p className="text-xs font-medium flex items-center gap-1.5">
               {lang === "pt" ? "Remover fundo" : "Remove background"}
+              {tier === "free" && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary border border-border text-muted-foreground">
+                  {lang === "pt" ? "Pro apenas" : "Pro only"}
+                </span>
+              )}
             </p>
             <p className="text-[10px] text-muted-foreground">
-              {lang === "pt" ? "PNG transparente para game engine" : "Transparent PNG for game engine"}
+              {tier === "free"
+                ? (lang === "pt" ? "Disponível no plano Pro (fal.ai)" : "Available on Pro plan (fal.ai)")
+                : (lang === "pt" ? "PNG transparente para game engine" : "Transparent PNG for game engine")}
             </p>
           </div>
           <button
-            onClick={() => setRemoveBackground(!removeBackground)}
+            onClick={() => tier === "pro" && setRemoveBackground(!removeBackground)}
             className={cn(
               "relative w-10 h-5 rounded-full transition-colors duration-200",
-              removeBackground ? "bg-accent" : "bg-secondary border border-border"
+              tier === "free"
+                ? "bg-secondary border border-border opacity-40 cursor-not-allowed"
+                : removeBackground ? "bg-accent" : "bg-secondary border border-border"
             )}
           >
             <motion.div
-              animate={{ x: removeBackground ? 20 : 2 }}
+              animate={{ x: (tier === "pro" && removeBackground) ? 20 : 2 }}
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
               className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow"
             />
@@ -278,22 +398,34 @@ export function AIGenerationPanel() {
         <Button
           onClick={handleGenerate}
           disabled={isGenerating || !prompt.trim()}
-          className="w-full bg-accent hover:bg-accent/90 text-accent-foreground glow-accent font-semibold"
+          className={cn(
+            "w-full font-semibold",
+            tier === "free"
+              ? "bg-emerald-600 hover:bg-emerald-600/90 text-white"
+              : "bg-violet-600 hover:bg-violet-600/90 text-white"
+          )}
         >
           {isGenerating ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              {lang === "pt" ? "Gerando com IA..." : "Generating with AI..."}
+              {tier === "free"
+                ? (lang === "pt" ? "Gerando grátis..." : "Generating free...")
+                : (lang === "pt" ? "Gerando Pro..." : "Generating Pro...")}
             </>
           ) : (
             <>
-              <Wand2 className="w-4 h-4 mr-2" />
-              {lang === "pt" ? "Gerar Pixel Art" : "Generate Pixel Art"}
+              <TierIcon className="w-4 h-4 mr-2" />
+              {lang === "pt" ? `Gerar Pixel Art · ${currentTier.label}` : `Generate Pixel Art · ${currentTier.label}`}
             </>
           )}
         </Button>
         <p className="text-[10px] text-center text-muted-foreground -mt-2">
           {lang === "pt" ? "Ctrl/⌘ + Enter para gerar" : "Ctrl/⌘ + Enter to generate"}
+          {tier === "free" && (
+            <span className="ml-2 text-emerald-500">
+              · {lang === "pt" ? "100% gratuito" : "100% free"}
+            </span>
+          )}
         </p>
 
         {/* ── Result Area ── */}
@@ -306,33 +438,69 @@ export function AIGenerationPanel() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="rounded-xl border border-accent/20 bg-accent/5 p-6 flex flex-col items-center gap-3"
+              className={cn(
+                "rounded-xl border p-6 flex flex-col items-center gap-3",
+                tier === "free"
+                  ? "border-emerald-500/20 bg-emerald-500/5"
+                  : "border-violet-500/20 bg-violet-500/5"
+              )}
             >
               <div className="relative">
                 <div className="w-16 h-16 rounded-xl bg-secondary/80 flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 text-accent animate-spin" />
+                  <Loader2 className={cn(
+                    "w-8 h-8 animate-spin",
+                    tier === "free" ? "text-emerald-400" : "text-violet-400"
+                  )} />
                 </div>
                 <motion.div
-                  className="absolute -inset-1 rounded-xl border-2 border-accent/40"
+                  className={cn(
+                    "absolute -inset-1 rounded-xl border-2",
+                    tier === "free" ? "border-emerald-500/40" : "border-violet-500/40"
+                  )}
                   animate={{ opacity: [0.3, 1, 0.3] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 />
               </div>
+
+              {/* Animated step text */}
               <div className="text-center">
-                <p className="text-sm font-medium text-accent">
-                  {lang === "pt" ? "IA gerando seu sprite..." : "AI generating your sprite..."}
-                </p>
+                <motion.p
+                  key={loadingSteps[0]}
+                  className={cn(
+                    "text-sm font-medium",
+                    tier === "free" ? "text-emerald-400" : "text-violet-400"
+                  )}
+                >
+                  {tier === "free"
+                    ? (lang === "pt" ? "Gerando grátis com Pollinations.ai..." : "Generating free with Pollinations.ai...")
+                    : (lang === "pt" ? "Gerando Pro com fal.ai..." : "Generating Pro with fal.ai...")}
+                </motion.p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {lang === "pt"
-                    ? "Gerando • Removendo fundo • Otimizando"
-                    : "Generating • Removing background • Optimizing"}
+                  {tier === "free"
+                    ? (lang === "pt" ? "Pode levar 15-30 segundos" : "May take 15-30 seconds")
+                    : (lang === "pt" ? "Gerando • Removendo fundo • Processando" : "Generating • Removing background • Processing")}
                 </p>
               </div>
+
+              {/* Speed indicator */}
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/60 border border-border">
+                <Gauge className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground">
+                  {tier === "free"
+                    ? (lang === "pt" ? "Modo Gratuito · ~15-30s" : "Free Mode · ~15-30s")
+                    : (lang === "pt" ? "Modo Pro · ~3-5s" : "Pro Mode · ~3-5s")}
+                </span>
+              </div>
+
+              {/* Pixel dots animation */}
               <div className="flex gap-1">
                 {[0,1,2,3,4,5,6,7].map((i) => (
                   <motion.div
                     key={i}
-                    className="w-2 h-2 rounded-sm bg-accent"
+                    className={cn(
+                      "w-2 h-2 rounded-sm",
+                      tier === "free" ? "bg-emerald-500" : "bg-violet-500"
+                    )}
                     animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.2, 0.8] }}
                     transition={{ duration: 1, repeat: Infinity, delay: i * 0.12 }}
                   />
@@ -348,13 +516,13 @@ export function AIGenerationPanel() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className={`rounded-xl border p-4 ${
+              className={cn(
+                "rounded-xl border p-4",
                 errorType === "balance"
                   ? "border-amber-500/30 bg-amber-500/5"
                   : "border-destructive/30 bg-destructive/5"
-              }`}
+              )}
             >
-              {/* Balance / Forbidden error — special treatment */}
               {errorType === "balance" ? (
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
@@ -363,55 +531,43 @@ export function AIGenerationPanel() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-amber-400">
-                        {lang === "pt" ? "Geração de IA indisponível" : "AI Generation unavailable"}
+                        {lang === "pt" ? "Geração Pro indisponível" : "Pro generation unavailable"}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                         {lang === "pt"
-                          ? "Saldo da conta fal.ai esgotado. Recarregue os créditos para continuar gerando pixel art com IA."
-                          : "fal.ai account balance exhausted. Top up credits to continue generating pixel art with AI."}
+                          ? "Saldo da conta fal.ai esgotado. Use o modo Grátis enquanto isso, ou recarregue créditos."
+                          : "fal.ai account balance exhausted. Use Free mode in the meantime, or top up credits."}
                       </p>
                     </div>
                   </div>
-
-                  {/* Action buttons */}
-                  <div className="flex flex-col gap-2 pl-12">
+                  <div className="pl-12 space-y-2">
+                    <button
+                      onClick={() => { setTier("free"); setError(null); setErrorType(null) }}
+                      className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-medium transition-all"
+                    >
+                      <Zap className="w-3 h-3" />
+                      {lang === "pt" ? "Mudar para modo Grátis agora" : "Switch to Free mode now"}
+                    </button>
                     <a
                       href="https://fal.ai/dashboard/billing"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-medium transition-all"
+                      className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs transition-all"
                     >
                       <ExternalLink className="w-3 h-3" />
-                      {lang === "pt" ? "Recarregar créditos em fal.ai/dashboard/billing" : "Top up at fal.ai/dashboard/billing"}
+                      {lang === "pt" ? "Recarregar em fal.ai/dashboard/billing" : "Top up at fal.ai/dashboard/billing"}
                     </a>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-px bg-border" />
-                      <span className="text-[10px] text-muted-foreground">
-                        {lang === "pt" ? "após recarregar" : "after topping up"}
-                      </span>
-                      <div className="flex-1 h-px bg-border" />
-                    </div>
-                    <button
-                      onClick={handleGenerate}
-                      className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg border border-border hover:border-accent/40 hover:text-accent text-muted-foreground text-xs transition-all"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      {lang === "pt" ? "Tentar novamente" : "Try again"}
-                    </button>
                   </div>
-
-                  {/* Tip */}
-                  <div className="ml-12 p-2.5 rounded-lg bg-secondary/50 border border-border">
-                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  <div className="ml-12 p-2 rounded-lg bg-secondary/50 border border-border">
+                    <p className="text-[10px] text-muted-foreground">
                       <span className="text-accent font-medium">💡 {lang === "pt" ? "Dica:" : "Tip:"}</span>{" "}
                       {lang === "pt"
-                        ? "$5 de crédito gera ~600 imagens. Flux Schnell custa ~$0.003 por imagem."
-                        : "$5 in credits generates ~600 images. Flux Schnell costs ~$0.003 per image."}
+                        ? "$5 de crédito gera ~600 imagens. Flux Schnell custa ~$0.003/imagem."
+                        : "$5 in credits generates ~600 images. Flux Schnell costs ~$0.003/image."}
                     </p>
                   </div>
                 </div>
               ) : (
-                /* Generic / other errors */
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
                   <div>
@@ -446,7 +602,7 @@ export function AIGenerationPanel() {
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="rounded-xl border border-accent/30 bg-secondary/30 overflow-hidden"
             >
-              {/* Checkerboard bg (shows transparency) */}
+              {/* Checkerboard bg */}
               <div
                 className="relative flex items-center justify-center p-8 min-h-[180px]"
                 style={{
@@ -465,8 +621,17 @@ export function AIGenerationPanel() {
                   {lang === "pt" ? "Pronto!" : "Done!"}
                 </div>
                 {generationTime && (
-                  <div className="absolute top-2 left-2 px-2 py-1 rounded-full bg-background/80 text-muted-foreground text-[10px] backdrop-blur-sm">
-                    ⚡ {generationTime}s
+                  <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 rounded-full bg-background/80 text-muted-foreground text-[10px] backdrop-blur-sm">
+                    <Clock className="w-2.5 h-2.5" />
+                    {generationTime}s
+                    {usedProvider && (
+                      <span className={cn(
+                        "ml-1 font-medium",
+                        usedProvider === "pollinations" ? "text-emerald-400" : "text-violet-400"
+                      )}>
+                        · {usedProvider === "pollinations" ? "Free" : "Pro"}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
@@ -484,7 +649,7 @@ export function AIGenerationPanel() {
                       {selectedPaletteData.name} · {size}
                     </span>
                   </div>
-                  {removeBackground && (
+                  {tier === "pro" && removeBackground && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">
                       {lang === "pt" ? "Transparente" : "Transparent"}
                     </span>
@@ -528,9 +693,9 @@ export function AIGenerationPanel() {
                   : "Your generated pixel art will appear here"}
               </p>
               <p className="text-[10px] text-muted-foreground/60 text-center">
-                {lang === "pt"
-                  ? "Descreva o asset e clique em Gerar"
-                  : "Describe the asset and click Generate"}
+                {tier === "free"
+                  ? (lang === "pt" ? "✓ Grátis · Sem limite · Sem cadastro" : "✓ Free · Unlimited · No sign-up")
+                  : (lang === "pt" ? "⚡ Mais rápido · Remoção de fundo · fal.ai" : "⚡ Faster · Background removal · fal.ai")}
               </p>
             </motion.div>
           )}

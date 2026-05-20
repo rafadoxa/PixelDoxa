@@ -1,12 +1,33 @@
+/**
+ * POST /api/generate
+ *
+ * Hybrid pixel art generation pipeline:
+ *
+ *  tier: "free"  → Pollinations.ai (Flux Schnell, 100% free, no credits needed)
+ *  tier: "pro"   → fal.ai (Flux Schnell, paid, faster + background removal)
+ *
+ * Shared post-processing (both tiers):
+ *  1. Nearest-neighbor resize  → target sprite size (16–256 px)
+ *  2. Color quantization       → clamp every pixel to palette
+ *  3. Return base64 PNG data URL
+ */
+
 import { NextRequest, NextResponse } from "next/server"
 import { fal } from "@fal-ai/client"
 import { pixelProcess } from "@/lib/pixel-process"
+import {
+  generateFree,
+  generatePro,
+  removeBackgroundFree,
+  removeBackgroundPro,
+  type Tier,
+} from "@/lib/providers"
 
-// Configure fal client with server-side key
+// Configure fal.ai (only used for pro tier)
 fal.config({ credentials: process.env.FAL_KEY })
 
-// Map user-facing sizes to generation sizes
-// We generate at a high resolution, then downsample with nearest-neighbor
+// ── Size map ───────────────────────────────────────────────────────────────
+// We generate at higher resolution then nearest-neighbor downsample
 const SIZE_MAP: Record<string, { gen: number; out: number }> = {
   "16x16":   { gen: 512,  out: 16  },
   "32x32":   { gen: 512,  out: 32  },
@@ -15,7 +36,7 @@ const SIZE_MAP: Record<string, { gen: number; out: number }> = {
   "256x256": { gen: 1024, out: 256 },
 }
 
-// Prompt hints per palette (reinforce color constraints in the prompt)
+// ── Palette prompt hints ───────────────────────────────────────────────────
 const PALETTE_PROMPTS: Record<string, string> = {
   "default":   "pixel art sprite, clean pixel art style, game asset",
   "gameboy":   "gameboy palette, 4 colors, green monochrome tones, pixel art",
@@ -26,38 +47,42 @@ const PALETTE_PROMPTS: Record<string, string> = {
   "monokai":   "dark pixel art, monokai colors, cyberpunk style",
 }
 
+// ── Style prompt hints ─────────────────────────────────────────────────────
+const STYLE_MAP: Record<string, string> = {
+  character: "character sprite, front-facing, idle pose, centered",
+  item:      "item sprite, object, centered, clean edges",
+  tile:      "tileset tile, seamless, top-down view",
+  enemy:     "enemy sprite, game character, menacing, centered",
+  npc:       "NPC character sprite, friendly, game asset",
+  icon:      "icon, small sprite, symbolic, clear silhouette",
+}
+
+// ── Route handler ──────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
       prompt,
-      size = "64x64",
-      palette = "default",
-      style = "character",
+      size             = "64x64",
+      palette          = "default",
+      style            = "character",
       removeBackground = true,
+      tier             = "free",      // "free" | "pro"
     } = body
 
+    // ── Validate ──────────────────────────────────────────────────────────
     if (!prompt || prompt.trim().length < 2) {
-      return NextResponse.json(
-        { error: "Prompt is required" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Prompt is required" }, { status: 400 })
+    }
+    if (!["free", "pro"].includes(tier)) {
+      return NextResponse.json({ error: "tier must be 'free' or 'pro'" }, { status: 400 })
     }
 
-    const sizeConfig = SIZE_MAP[size] || SIZE_MAP["64x64"]
-    const palettePrompt = PALETTE_PROMPTS[palette] || PALETTE_PROMPTS["default"]
+    const sizeConfig    = SIZE_MAP[size]    ?? SIZE_MAP["64x64"]
+    const palettePrompt = PALETTE_PROMPTS[palette] ?? PALETTE_PROMPTS["default"]
+    const stylePrompt   = STYLE_MAP[style]  ?? STYLE_MAP["character"]
 
-    // Build pixel art optimized prompt
-    const styleMap: Record<string, string> = {
-      character: "character sprite, front-facing, idle pose, centered",
-      item:      "item sprite, object, centered, clean edges",
-      tile:      "tileset tile, seamless, top-down view",
-      enemy:     "enemy sprite, game character, menacing, centered",
-      npc:       "NPC character sprite, friendly, game asset",
-      icon:      "icon, small sprite, symbolic, clear silhouette",
-    }
-    const stylePrompt = styleMap[style] || styleMap["character"]
-
+    // ── Build prompt ──────────────────────────────────────────────────────
     const fullPrompt = [
       prompt,
       stylePrompt,
@@ -72,81 +97,79 @@ export async function POST(req: NextRequest) {
       "high resolution, detailed texture, noise, grain",
     ].join(", ")
 
-    // ── Step 1: Generate with fal.ai Flux Schnell ────────────────────────────
-    const result = await fal.run("fal-ai/flux/schnell", {
-      input: {
-        prompt: fullPrompt,
-        negative_prompt: negativePrompt,
-        image_size: {
-          width: sizeConfig.gen,
-          height: sizeConfig.gen,
-        },
-        num_inference_steps: 4,
-        num_images: 1,
-        enable_safety_checker: false,
-      },
-    }) as { images: Array<{ url: string; content_type: string }> }
-
-    if (!result.images || result.images.length === 0) {
-      return NextResponse.json(
-        { error: "No image generated" },
-        { status: 500 }
-      )
+    const genOptions = {
+      prompt:         fullPrompt,
+      negativePrompt,
+      width:          sizeConfig.gen,
+      height:         sizeConfig.gen,
+      steps:          4,
     }
 
-    const generatedImageUrl = result.images[0].url
+    // ── Step 1: Generate image ────────────────────────────────────────────
+    let genResult: { imageUrl: string; provider: string; durationMs?: number }
 
-    // ── Step 2: Optional background removal ─────────────────────────────────
-    // Run BEFORE pixel processing so bria-rmbg works on the full-res image
-    // (background removal on a 16px sprite would be unreliable)
-    let imageUrlForProcessing = generatedImageUrl
+    if ((tier as Tier) === "pro") {
+      // PRO: fal.ai Flux Schnell (~3-5s, requires FAL_KEY with balance)
+      if (!process.env.FAL_KEY) {
+        return NextResponse.json(
+          { error: "Pro tier requires FAL_KEY — configure in Vercel environment variables" },
+          { status: 503 }
+        )
+      }
+      genResult = await generatePro(genOptions, fal)
+    } else {
+      // FREE: Pollinations.ai Flux Schnell (~15-30s, no key needed)
+      genResult = await generateFree(genOptions)
+    }
+
+    const generatedImageUrl = genResult.imageUrl
+
+    // ── Step 2: Background removal ────────────────────────────────────────
+    // Pro tier: bria-rmbg (fal.ai, high quality)
+    // Free tier: skip (no free bg removal service reliable enough)
+    // NOTE: We do bg removal BEFORE downsampling — better quality at full res
+    let imageForProcessing = generatedImageUrl
+
     if (removeBackground) {
-      try {
-        const bgResult = await fal.run("fal-ai/bria/background/remove", {
-          input: {
-            image_url: generatedImageUrl,
-          },
-        }) as { image: { url: string } }
-        if (bgResult.image?.url) {
-          imageUrlForProcessing = bgResult.image.url
-        }
-      } catch (bgError) {
-        // Background removal failed — continue with original
-        console.warn("Background removal failed, using original:", bgError)
+      if ((tier as Tier) === "pro") {
+        imageForProcessing = await removeBackgroundPro(generatedImageUrl, fal)
+      } else {
+        imageForProcessing = await removeBackgroundFree(generatedImageUrl)
       }
     }
 
-    // ── Step 3: Grid Snapping + Color Quantization ───────────────────────────
-    // Download → nearest-neighbor resize → palette clamp → PNG base64
+    // ── Step 3: Grid snap + color quantization ────────────────────────────
+    // nearest-neighbor resize → target sprite size
+    // clamp every pixel to nearest palette color
     let finalImageUrl: string
     try {
       finalImageUrl = await pixelProcess(
-        imageUrlForProcessing,
-        sizeConfig.out,   // e.g. 64 for "64x64"
-        palette           // e.g. "pico8"
+        imageForProcessing,
+        sizeConfig.out,
+        palette
       )
     } catch (processError) {
-      // If post-processing fails, fall back to the raw URL
-      console.warn("Pixel processing failed, returning raw URL:", processError)
-      finalImageUrl = imageUrlForProcessing
+      console.warn("Pixel processing failed, returning raw:", processError)
+      finalImageUrl = imageForProcessing
     }
 
+    // ── Response ──────────────────────────────────────────────────────────
     return NextResponse.json({
-      success: true,
-      imageUrl: finalImageUrl,         // processed base64 PNG (or fallback URL)
-      originalUrl: generatedImageUrl,  // raw fal.ai URL (for debugging)
-      prompt: fullPrompt,
-      size: size,
-      palette: palette,
-      processed: finalImageUrl.startsWith("data:"), // true = grid snap + quantize applied
+      success:          true,
+      imageUrl:         finalImageUrl,
+      originalUrl:      generatedImageUrl,
+      prompt:           fullPrompt,
+      size,
+      palette,
+      tier,
+      provider:         genResult.provider,
+      processed:        finalImageUrl.startsWith("data:"),
+      generationMs:     genResult.durationMs,
     })
 
   } catch (error: unknown) {
     console.error("Generation error:", error)
     const message = error instanceof Error ? error.message : "Generation failed"
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
