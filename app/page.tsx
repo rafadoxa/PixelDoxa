@@ -12,6 +12,7 @@ import { ExportCenter } from "@/components/export-center"
 import { CommunityGallery } from "@/components/community-gallery"
 import { SpritesheetSlicer } from "@/components/spritesheet-slicer"
 import { TilesetForge } from "@/components/tileset-forge"
+import { TruePixel } from "@/components/true-pixel"
 import { PixelDoxaWorkflow } from "@/components/pixeldoxa-workflow"
 import { VideoShowcase } from "@/components/video-showcase"
 import { AnimationPipeline } from "@/components/animation-pipeline"
@@ -492,43 +493,50 @@ export default function PixelDoxaApp() {
             </div>
           )}
 
-          {/* [3] SpriteSheet Generator */}
-          {(activeTool === t.sidebar.tools[3] || activeTool === t.sidebar.tools[4]) && (
+          {/* [3] True Pixel — NEW */}
+          {activeTool === t.sidebar.tools[3] && (
+            <div className="max-w-7xl mx-auto">
+              <TruePixel />
+            </div>
+          )}
+
+          {/* [4] SpriteSheet Generator */}
+          {(activeTool === t.sidebar.tools[4] || activeTool === t.sidebar.tools[5]) && (
             <div className="grid lg:grid-cols-2 gap-6">
               <AIGenerationPanel />
               <MainWorkspace />
             </div>
           )}
 
-          {/* [5] Pixel Editor */}
-          {activeTool === t.sidebar.tools[5] && (
+          {/* [6] Pixel Editor */}
+          {activeTool === t.sidebar.tools[6] && (
             <div className="grid lg:grid-cols-2 gap-6">
               <PixelEditor />
               <MainWorkspace />
             </div>
           )}
 
-          {/* [6] Procedural Map Generator */}
-          {activeTool === t.sidebar.tools[6] && (
+          {/* [7] Procedural Map Generator */}
+          {activeTool === t.sidebar.tools[7] && (
             <div className="max-w-5xl mx-auto">
               <ProceduralGenerator />
             </div>
           )}
 
-          {/* [7] Export Center */}
-          {activeTool === t.sidebar.tools[7] && (
+          {/* [8] Export Center */}
+          {activeTool === t.sidebar.tools[8] && (
             <div className="max-w-4xl mx-auto">
               <ExportCenter />
             </div>
           )}
 
-          {/* [8] Community */}
-          {activeTool === t.sidebar.tools[8] && (
+          {/* [9] Community */}
+          {activeTool === t.sidebar.tools[9] && (
             <CommunityGallery />
           )}
 
-          {/* [9] (extra if any) */}
-          {activeTool === t.sidebar.tools[9] && (
+          {/* [10] (extra if any) */}
+          {activeTool === t.sidebar.tools[10] && (
             <div className="max-w-3xl mx-auto">
               <div className="bg-card border border-border rounded-xl p-8">
                 <h3 className="text-lg font-semibold mb-4">AI Prompt History</h3>
