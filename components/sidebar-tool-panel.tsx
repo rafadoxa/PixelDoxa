@@ -24,18 +24,9 @@ import {
 } from "lucide-react"
 import { PixelSprite, PIXEL_SPRITES } from "@/components/pixel-art-showcase"
 import { cn } from "@/lib/utils"
+import { useLanguage } from "@/lib/language-context"
 
-const tools = [
-  { icon: User, label: "Character Generator", active: true },
-  { icon: Grid3X3, label: "SpriteSheet Generator" },
-  { icon: Layers, label: "Tileset Generator" },
-  { icon: Play, label: "Animation Creator" },
-  { icon: Map, label: "Procedural Map Generator" },
-  { icon: Palette, label: "Pixel Editor" },
-  { icon: FolderOpen, label: "Asset Library" },
-  { icon: History, label: "AI Prompt History" },
-  { icon: Download, label: "Export Center" },
-]
+const TOOL_ICONS = [User, Grid3X3, Layers, Play, Map, Palette, FolderOpen, History, Download]
 
 const genres = [
   { icon: Sword, label: "RPG" },
@@ -52,7 +43,9 @@ interface SidebarToolPanelProps {
 }
 
 export function SidebarToolPanel({ activeTool, setActiveTool }: SidebarToolPanelProps) {
+  const { t } = useLanguage()
   const [hoveredTool, setHoveredTool] = useState<string | null>(null)
+  const tools = t.sidebar.tools.map((label, i) => ({ icon: TOOL_ICONS[i] ?? User, label }))
 
   return (
     <motion.aside
@@ -154,9 +147,9 @@ export function SidebarToolPanel({ activeTool, setActiveTool }: SidebarToolPanel
         >
           <div className="flex items-center gap-2 mb-1">
             <Zap className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium">Upgrade Pro</span>
+            <span className="text-sm font-medium">{t.sidebar.upgradeBadge}</span>
           </div>
-          <p className="text-xs text-muted-foreground">Unlimited generations + Spritesheets</p>
+          <p className="text-xs text-muted-foreground">{t.sidebar.upgradeDesc}</p>
         </motion.div>
         
         {/* Credits */}

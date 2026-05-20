@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { useLanguage } from "@/lib/language-context"
 import { useState } from "react"
 import { 
   Lightbulb, 
@@ -741,6 +742,7 @@ function StepPreview({ activeStep }: { activeStep: number }) {
 }
 
 export function PixelDoxaWorkflow() {
+  const { t } = useLanguage()
   const [activeStep, setActiveStep] = useState(0)
   
   return (
@@ -761,11 +763,11 @@ export function PixelDoxaWorkflow() {
             <span className="text-sm text-accent font-medium">Workflow Completo</span>
           </div>
           <h2 className="text-3xl lg:text-5xl font-bold mb-4">
-            Do Conceito ao <span className="text-accent">Game-Ready</span>
+            From Concept to <span className="text-accent">Game-Ready</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Uma pipeline profissional de criacao de assets que transforma suas ideias em sprites, 
-            animacoes e mundos prontos para seu jogo
+            A professional asset creation pipeline that transforms your ideas into sprites,{" "}
+            {t.workflow.readyAssets}
           </p>
         </motion.div>
         

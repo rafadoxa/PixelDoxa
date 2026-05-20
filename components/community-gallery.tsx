@@ -8,25 +8,26 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { useLanguage } from "@/lib/language-context"
 
 // Premium sprite sheet showcase images
 const SHOWCASE_IMAGES = {
   swordsmanRed: {
     url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2-CsuGRMdjgj0c2qo0pC8A6GhYZ3wvwt.png",
     title: "Royal Vanguard",
-    description: "Spritesheet completo para personagem cavaleiro medieval. Inclui 6 animacoes: Idle, Walk, Attack com efeitos de slash, Dash, Hurt e Death.",
+    description: "Complete spritesheet for a medieval knight character. Includes 6 animations: Idle, Walk, Attack with slash effects, Dash, Hurt and Death.",
     author: "CrimsonForge",
     stats: { frames: 56, animations: 6, resolution: "128x128" },
-    tags: ["Personagem", "Animacao", "Medieval", "128px"],
+    tags: ["Character", "Animation", "Medieval", "128px"],
     style: "Action RPG"
   },
   rogueBlue: {
     url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1-i3jLlgkcUa7CEkye7AcwXp0q4wAfQm.png",
     title: "Arcane Knight",
-    description: "Guerreiro mistico com efeitos de energia. Animacoes fluidas com VFX em ataques e dash. Pronto para producao.",
+    description: "Mystical warrior with energy effects. Fluid animations with VFX on attacks and dash. Production-ready.",
     author: "NeonPixelWorks",
     stats: { frames: 64, animations: 6, resolution: "128x128" },
-    tags: ["Personagem", "Animacao", "Fantasy", "128px"],
+    tags: ["Character", "Animation", "Fantasy", "128px"],
     style: "Dark Fantasy"
   }
 }
@@ -36,12 +37,12 @@ const galleryItems = [
   {
     id: 1,
     name: "Royal Vanguard",
-    subtitle: "Character Pack - 6 Animacoes",
+    subtitle: "Character Pack - 6 Animations",
     author: "CrimsonForge",
     likes: 2847,
     downloads: 1521,
     views: 8472,
-    tags: ["Personagem", "128px", "Medieval"],
+    tags: ["Character", "128px", "Medieval"],
     featured: true,
     isPremium: true,
     imageKey: "swordsmanRed" as const,
@@ -52,12 +53,12 @@ const galleryItems = [
   {
     id: 2,
     name: "Arcane Knight",
-    subtitle: "Character Pack - 6 Animacoes",
+    subtitle: "Character Pack - 6 Animations",
     author: "NeonPixelWorks",
     likes: 2193,
     downloads: 1392,
     views: 6456,
-    tags: ["Personagem", "128px", "Fantasy"],
+    tags: ["Character", "128px", "Fantasy"],
     featured: true,
     isPremium: true,
     imageKey: "rogueBlue" as const,
@@ -67,10 +68,12 @@ const galleryItems = [
   },
 ]
 
-const categories = ["Todos", "Em Destaque", "Personagens", "Tilesets", "Spritesheets", "Ambiente"]
+// categories defined inside component from i18n
 
 export function CommunityGallery() {
-  const [activeCategory, setActiveCategory] = useState("Todos")
+  const { t } = useLanguage()
+  const categories = t.gallery.categories as readonly string[]
+  const [activeCategory, setActiveCategory] = useState<string>(categories[0])
   const [hoveredItem, setHoveredItem] = useState<number | null>(null)
   const [likedItems, setLikedItems] = useState<number[]>([])
   const [searchQuery, setSearchQuery] = useState("")
@@ -83,11 +86,14 @@ export function CommunityGallery() {
   }
 
   const filteredItems = galleryItems.filter(item => {
-    const matchesCategory = activeCategory === "Todos" 
-      ? true 
-      : activeCategory === "Em Destaque"
+    const isAll      = activeCategory === categories[0]  // All / Todos
+    const isFeatured = activeCategory === categories[1]  // Featured / Em Destaque
+    const isSheet    = activeCategory === categories[4]  // Spritesheets
+    const matchesCategory = isAll
+      ? true
+      : isFeatured
       ? item.featured
-      : activeCategory === "Spritesheets"
+      : isSheet
       ? item.frameCount > 10
       : item.tags.some(tag => tag.toLowerCase().includes(activeCategory.toLowerCase().slice(0, -1)))
     
@@ -116,7 +122,7 @@ export function CommunityGallery() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4 border border-accent/20"
           >
             <Sparkles className="w-4 h-4 text-accent" />
-            <span className="text-sm text-muted-foreground">Assets Premium</span>
+            <span className="text-sm text-muted-foreground">{t.gallery.badge}</span>
           </motion.div>
           
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
@@ -124,7 +130,7 @@ export function CommunityGallery() {
             <span className="text-accent">Marketplace</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Spritesheets profissionais criados pela comunidade. Assets prontos para producao com animacoes completas e exportacao direta.
+            {t.gallery.subtitle}
           </p>
         </div>
 
@@ -134,7 +140,7 @@ export function CommunityGallery() {
             <div className="relative flex-1 md:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
-                placeholder="Buscar sprites, tilesets..." 
+                placeholder={t.gallery.search}
                 className="pl-10 bg-secondary/50 border-border focus:border-accent/50"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -211,7 +217,7 @@ export function CommunityGallery() {
                     {item.featured && (
                       <Badge className="bg-accent/90 text-accent-foreground gap-1 shadow-lg">
                         <Star className="w-3 h-3 fill-current" />
-                        Destaque
+                        {t.gallery.tags.Featured}
                       </Badge>
                     )}
                     {item.isPremium && (
@@ -243,7 +249,7 @@ export function CommunityGallery() {
                   <div className="absolute bottom-4 left-4 z-20 flex gap-2">
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-background/80 backdrop-blur-sm text-xs font-medium">
                       <Play className="w-3.5 h-3.5 text-accent" />
-                      {item.animationCount} Animacoes
+                      {item.animationCount} Animations
                     </div>
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-background/80 backdrop-blur-sm text-xs font-medium">
                       <Layers className="w-3.5 h-3.5 text-accent" />
@@ -320,7 +326,7 @@ export function CommunityGallery() {
                       </Button>
                       <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
                         <Download className="w-4 h-4 mr-1.5" />
-                        Baixar
+                        Download
                       </Button>
                     </div>
                   </div>
@@ -334,7 +340,7 @@ export function CommunityGallery() {
         <div className="mb-16">
           <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
             <Play className="w-5 h-5 text-accent" />
-            Animacoes Incluidas
+            Included Animations
           </h3>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -368,8 +374,8 @@ export function CommunityGallery() {
             <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
               <Grid3X3 className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Nenhum asset encontrado</h3>
-            <p className="text-muted-foreground">Tente ajustar seus filtros ou busca</p>
+            <h3 className="text-lg font-semibold mb-2">No assets found</h3>
+            <p className="text-muted-foreground">Try adjusting your filters or search</p>
           </div>
         )}
 
@@ -377,7 +383,7 @@ export function CommunityGallery() {
         <div className="flex justify-center mt-12">
           <Button variant="outline" size="lg" className="group">
             <Layers className="w-4 h-4 mr-2" />
-            Explorar Mais Assets
+            Explore More Assets
             <ExternalLink className="w-4 h-4 ml-2 opacity-50 group-hover:opacity-100 transition-opacity" />
           </Button>
         </div>
@@ -386,10 +392,10 @@ export function CommunityGallery() {
         <div className="mt-16 pt-8 border-t border-border">
           <div className="flex flex-wrap items-center justify-center gap-12">
             {[
-              { value: "12.5K+", label: "Sprites Premium", icon: Sparkles },
-              { value: "8.2K+", label: "Artistas Ativos", icon: User },
-              { value: "45K+", label: "Downloads Hoje", icon: Download },
-              { value: "98%", label: "Aprovacao", icon: Star },
+              { value: "12.5K+", label: t.gallery.stats.sprites, icon: Sparkles },
+              { value: "8.2K+",  label: t.gallery.stats.artists, icon: User },
+              { value: "45K+",   label: "Downloads Today",       icon: Download },
+              { value: "98%",    label: "Approval Rate",         icon: Star },
             ].map((stat, i) => (
               <motion.div 
                 key={i} 

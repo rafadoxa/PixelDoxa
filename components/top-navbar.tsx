@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Menu, Moon, Sun, Search, Bell, User, Sparkles, Command } from "lucide-react"
+import { Menu, Moon, Sun, Search, Bell, Sparkles, Command } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -10,13 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-const navLinks = [
-  { label: "Features", href: "#" },
-  { label: "Gallery", href: "#" },
-  { label: "Docs", href: "#" },
-  { label: "Pricing", href: "#" },
-]
+import { useLanguage } from "@/lib/language-context"
 
 interface TopNavbarProps {
   onMenuClick: () => void
@@ -25,6 +19,15 @@ interface TopNavbarProps {
 }
 
 export function TopNavbar({ onMenuClick, isDarkMode, toggleDarkMode }: TopNavbarProps) {
+  const { lang, setLang, t } = useLanguage()
+
+  const navLinks = [
+    { label: t.nav.features, href: "#features" },
+    { label: t.nav.gallery,  href: "#gallery"  },
+    { label: t.nav.docs,     href: "#"          },
+    { label: t.nav.pricing,  href: "#pricing"   },
+  ]
+
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -82,7 +85,7 @@ export function TopNavbar({ onMenuClick, isDarkMode, toggleDarkMode }: TopNavbar
         <div className="relative w-full group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search sprites, tilesets, characters..."
+            placeholder={t.nav.search}
             className="pl-10 pr-16 bg-secondary/50 border-border focus:bg-secondary focus:border-accent/50 transition-colors"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-muted-foreground">
@@ -95,6 +98,33 @@ export function TopNavbar({ onMenuClick, isDarkMode, toggleDarkMode }: TopNavbar
 
       {/* Right Section */}
       <div className="flex items-center gap-2">
+
+        {/* ── Language Toggle ── */}
+        <div className="flex items-center gap-0.5 bg-secondary/60 rounded-lg p-0.5 border border-border">
+          <button
+            onClick={() => setLang("en")}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-200 ${
+              lang === "en"
+                ? "bg-accent text-accent-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <span className="text-sm">🇺🇸</span>
+            <span className="hidden sm:inline">EN</span>
+          </button>
+          <button
+            onClick={() => setLang("pt")}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-200 ${
+              lang === "pt"
+                ? "bg-accent text-accent-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <span className="text-sm">🇧🇷</span>
+            <span className="hidden sm:inline">PT</span>
+          </button>
+        </div>
+
         <Button
           variant="ghost"
           size="icon"
@@ -117,7 +147,6 @@ export function TopNavbar({ onMenuClick, isDarkMode, toggleDarkMode }: TopNavbar
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
-                {/* Pixel avatar placeholder */}
                 <div className="grid grid-cols-3 gap-px">
                   {[1,2,1,2,3,2,1,2,1].map((c, i) => (
                     <div

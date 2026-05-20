@@ -16,13 +16,15 @@ import { AnimationPipeline } from "@/components/animation-pipeline"
 import { PixelSprite, PIXEL_SPRITES, PixelScene } from "@/components/pixel-art-showcase"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
+import { useLanguage } from "@/lib/language-context"
 import { Sparkles, Wand2, Grid3X3, Layers, Gamepad2, ArrowRight, Zap, Check, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function PixelDoxaApp() {
+  const { t } = useLanguage()
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [activeTool, setActiveTool] = useState("Gerador de Personagens")
+  const [activeTool, setActiveTool] = useState(t.sidebar.tools[0])
   const [showLanding, setShowLanding] = useState(true)
 
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode)
@@ -75,57 +77,28 @@ export default function PixelDoxaApp() {
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4 border border-accent/20"
                 >
                   <Zap className="w-4 h-4 text-accent" />
-                  <span className="text-sm text-muted-foreground">Ferramentas Profissionais</span>
+                  <span className="text-sm text-muted-foreground">{t.features.badge}</span>
                 </motion.div>
                 
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Pipeline completo de{" "}
-                  <span className="text-accent">producao de assets</span>
+                  {t.features.title1}{" "}
+                  <span className="text-accent">{t.features.titleAcc}</span>{" "}
+                  {t.features.title2}
                 </h2>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Ferramentas profissionais de criacao, animacao e exportacao para desenvolvedores indie
+                  {t.features.subtitle}
                 </p>
               </div>
               
               {/* Feature Cards with Pixel Art */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                 {[
-                  {
-                    icon: Wand2,
-                    title: "Sprite Generation",
-                    description: "Crie personagens unicos a partir de descricoes textuais detalhadas",
-                    sprite: PIXEL_SPRITES.seaOfStarsMage,
-                  },
-                  {
-                    icon: Layers,
-                    title: "Animation Pipeline",
-                    description: "Walk cycles, attacks, idle e estados completos em um workflow",
-                    sprite: PIXEL_SPRITES.drifter,
-                  },
-                  {
-                    icon: Grid3X3,
-                    title: "Tileset Workflow",
-                    description: "Tilesets seamless para level design com auto-tiling integrado",
-                    sprite: PIXEL_SPRITES.enchantedTree,
-                  },
-                  {
-                    icon: Gamepad2,
-                    title: "Engine Integration",
-                    description: "Exporte para Godot, Unity, GameMaker com formatos nativos",
-                    sprite: PIXEL_SPRITES.stonePath,
-                  },
-                  {
-                    icon: Sparkles,
-                    title: "VFX Assets",
-                    description: "Particulas, efeitos de impacto e elementos visuais animados",
-                    sprite: PIXEL_SPRITES.crystal,
-                  },
-                  {
-                    icon: Star,
-                    title: "NPC Library",
-                    description: "Inimigos, NPCs e criaturas com spritesheets completos",
-                    sprite: PIXEL_SPRITES.mysticOrb,
-                  },
+                  { icon: Wand2,    ...t.features.cards.sprite,    sprite: PIXEL_SPRITES.seaOfStarsMage },
+                  { icon: Layers,   ...t.features.cards.animation, sprite: PIXEL_SPRITES.drifter        },
+                  { icon: Grid3X3,  ...t.features.cards.tileset,   sprite: PIXEL_SPRITES.enchantedTree  },
+                  { icon: Gamepad2, ...t.features.cards.engine,    sprite: PIXEL_SPRITES.stonePath      },
+                  { icon: Sparkles, ...t.features.cards.vfx,       sprite: PIXEL_SPRITES.crystal        },
+                  { icon: Star,     ...t.features.cards.npc,       sprite: PIXEL_SPRITES.mysticOrb      },
                 ].map((feature, i) => (
                   <motion.div
                     key={i}
@@ -264,33 +237,9 @@ export default function PixelDoxaApp() {
               
               <div className="grid md:grid-cols-3 gap-6">
                 {[
-                  {
-                    name: "Free",
-                    price: "R$0",
-                    period: "/mês",
-                    description: "Para experimentar",
-                    features: ["50 gerações/mês", "Resolução até 64x64", "Formatos PNG básico", "Comunidade"],
-                    cta: "Começar Grátis",
-                    popular: false,
-                  },
-                  {
-                    name: "Pro",
-                    price: "R$49",
-                    period: "/mês",
-                    description: "Para desenvolvedores indie",
-                    features: ["Gerações ilimitadas", "Até 256x256", "Todos os formatos", "Spritesheets", "Animações", "Sem marca d'água"],
-                    cta: "Começar Pro",
-                    popular: true,
-                  },
-                  {
-                    name: "Studio",
-                    price: "R$149",
-                    period: "/mês",
-                    description: "Para times",
-                    features: ["Tudo do Pro", "5 membros", "API access", "Prioridade", "Assets exclusivos", "Suporte dedicado"],
-                    cta: "Contatar Vendas",
-                    popular: false,
-                  },
+                  { ...t.pricing.plans.free,   popular: false },
+                  { ...t.pricing.plans.pro,    popular: true  },
+                  { ...t.pricing.plans.studio, popular: false },
                 ].map((plan, i) => (
                   <motion.div
                     key={i}
@@ -305,7 +254,7 @@ export default function PixelDoxaApp() {
                   >
                     {plan.popular && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-accent text-accent-foreground text-xs font-medium rounded-full">
-                        Mais Popular
+                        {t.pricing.popular}
                       </div>
                     )}
                     
@@ -314,7 +263,7 @@ export default function PixelDoxaApp() {
                       <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
                       <div className="flex items-baseline justify-center gap-1">
                         <span className="text-4xl font-bold">{plan.price}</span>
-                        <span className="text-muted-foreground">{plan.period}</span>
+                        <span className="text-muted-foreground">{t.pricing.period}</span>
                       </div>
                     </div>
                     
@@ -504,48 +453,48 @@ export default function PixelDoxaApp() {
           </div>
           
           {/* Tool Content */}
-          {(activeTool === "Gerador de Personagens" || 
-            activeTool === "Gerador de SpriteSheet" ||
-            activeTool === "Gerador de Tileset") && (
+          {(activeTool === t.sidebar.tools[0] || 
+            activeTool === t.sidebar.tools[1] ||
+            activeTool === t.sidebar.tools[2]) && (
             <div className="grid lg:grid-cols-2 gap-6">
               <AIGenerationPanel />
               <MainWorkspace />
             </div>
           )}
           
-          {activeTool === "Criador de Animações" && (
+          {activeTool === t.sidebar.tools[3] && (
             <div className="grid lg:grid-cols-2 gap-6">
               <PixelEditor />
               <MainWorkspace />
             </div>
           )}
           
-          {activeTool === "Gerador Procedural de Mapas" && (
+          {activeTool === t.sidebar.tools[4] && (
             <div className="max-w-5xl mx-auto">
               <ProceduralGenerator />
             </div>
           )}
           
-          {activeTool === "Editor de Pixels" && (
+          {activeTool === t.sidebar.tools[5] && (
             <div className="max-w-5xl mx-auto">
               <PixelEditor />
             </div>
           )}
           
-          {activeTool === "Biblioteca de Assets" && (
+          {activeTool === t.sidebar.tools[6] && (
             <CommunityGallery />
           )}
           
-          {activeTool === "Histórico de Prompts IA" && (
+          {activeTool === t.sidebar.tools[7] && (
             <div className="max-w-3xl mx-auto">
               <div className="bg-card border border-border rounded-xl p-8">
-                <h3 className="text-lg font-semibold mb-4">Histórico de Prompts</h3>
+                <h3 className="text-lg font-semibold mb-4">AI Prompt History</h3>
                 <div className="space-y-3">
                   {[
-                    { prompt: "Um guerreiro medieval com armadura dourada, estilo SNES Final Fantasy", time: "2 min atrás" },
-                    { prompt: "Tileset de floresta encantada com cogumelos brilhantes", time: "15 min atrás" },
-                    { prompt: "Slime inimigo verde com animação de ataque e morte", time: "1 hora atrás" },
-                    { prompt: "Mago elemental com cajado de fogo, 4 direções", time: "2 horas atrás" },
+                    { prompt: "Medieval warrior with golden armor, SNES Final Fantasy style", time: "2 min ago" },
+                    { prompt: "Enchanted forest tileset with glowing mushrooms", time: "15 min ago" },
+                    { prompt: "Green slime enemy with attack and death animation", time: "1 hour ago" },
+                    { prompt: "Elemental mage with fire staff, 4 directions", time: "2 hours ago" },
                   ].map((item, i) => (
                     <div key={i} className="p-4 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors cursor-pointer group">
                       <p className="text-sm mb-1 group-hover:text-accent transition-colors">{item.prompt}</p>
@@ -557,7 +506,7 @@ export default function PixelDoxaApp() {
             </div>
           )}
           
-          {activeTool === "Central de Exportação" && (
+          {activeTool === t.sidebar.tools[8] && (
             <div className="max-w-4xl mx-auto">
               <ExportCenter />
             </div>

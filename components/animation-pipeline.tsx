@@ -1,4 +1,5 @@
 "use client"
+import { useLanguage } from "@/lib/language-context"
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -81,6 +82,7 @@ const PIPELINE_FEATURES = [
 ]
 
 export function AnimationPipeline() {
+  const { t } = useLanguage()
   const [selectedAnimation, setSelectedAnimation] = useState(ANIMATION_TYPES[2]) // Attack
   const [currentFrame, setCurrentFrame] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
@@ -127,13 +129,12 @@ export function AnimationPipeline() {
             <span className="text-sm font-medium">Animation Pipeline</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4 text-balance">
-            Workflow de{" "}
-            <span className="text-accent">Animacao</span>{" "}
-            Profissional
+            Animation{" "}
+            <span className="text-accent">{t.animationPipeline.badge}</span>{" "}
+            Workflow
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg text-pretty">
-            Pipeline completo para criar spritesheets animados game-ready. 
-            Da concepcao ao export em minutos.
+            {t.animationPipeline.subtitle}
           </p>
         </motion.div>
 

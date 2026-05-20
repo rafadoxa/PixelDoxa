@@ -1,4 +1,5 @@
 "use client"
+import { useLanguage } from "@/lib/language-context"
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -348,6 +349,7 @@ function VideoPlayer({ demo, isPlaying }: { demo: typeof DEMO_VIDEOS[0]; isPlayi
 }
 
 export function VideoShowcase() {
+  const { t } = useLanguage()
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
   const [isMuted, setIsMuted] = useState(true)
@@ -399,15 +401,15 @@ export function VideoShowcase() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4 border border-accent/20">
             <Play className="w-4 h-4 text-accent" />
-            <span className="text-sm text-muted-foreground">Veja em Acao</span>
+            <span className="text-sm text-muted-foreground">See it in Action</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Pipeline{" "}
-            <span className="text-accent">Profissional</span>{" "}
-            em Acao
+            <span className="text-accent">{t.videoShowcase.badge}</span>{" "}
+            in Action
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Acompanhe o workflow completo de criacao de assets pixel art em tempo real
+            Watch the complete pixel art asset creation workflow in real time
           </p>
         </motion.div>
         
