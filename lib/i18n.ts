@@ -179,6 +179,7 @@ export const translations = {
     sidebar: {
       tools: [
         "Character Generator",
+        "Sprite Sheet Slicer",
         "SpriteSheet Generator",
         "Tileset Generator",
         "Pixel Editor",
@@ -373,6 +374,7 @@ export const translations = {
     sidebar: {
       tools: [
         "Gerador de Personagens",
+        "Sprite Sheet Slicer",
         "Gerador de SpriteSheet",
         "Gerador de Tileset",
         "Editor de Pixel",

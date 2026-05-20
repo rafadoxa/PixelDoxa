@@ -10,6 +10,7 @@ import { PixelEditor } from "@/components/pixel-editor"
 import { ProceduralGenerator } from "@/components/procedural-generator"
 import { ExportCenter } from "@/components/export-center"
 import { CommunityGallery } from "@/components/community-gallery"
+import { SpritesheetSlicer } from "@/components/spritesheet-slicer"
 import { PixelDoxaWorkflow } from "@/components/pixeldoxa-workflow"
 import { VideoShowcase } from "@/components/video-showcase"
 import { AnimationPipeline } from "@/components/animation-pipeline"
@@ -453,39 +454,70 @@ export default function PixelDoxaApp() {
           </div>
           
           {/* Tool Content */}
-          {(activeTool === t.sidebar.tools[0] || 
-            activeTool === t.sidebar.tools[1] ||
-            activeTool === t.sidebar.tools[2]) && (
+
+          {/* [0] Character Generator */}
+          {activeTool === t.sidebar.tools[0] && (
             <div className="grid lg:grid-cols-2 gap-6">
               <AIGenerationPanel />
               <MainWorkspace />
             </div>
           )}
-          
-          {activeTool === t.sidebar.tools[3] && (
+
+          {/* [1] Sprite Sheet Slicer — NEW */}
+          {activeTool === t.sidebar.tools[1] && (
+            <div className="max-w-6xl mx-auto">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <span className="text-accent">🎬</span>
+                  Sprite Sheet Slicer
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t.sidebar.tools[1] === "Sprite Sheet Slicer"
+                    ? "Generate frames with AI, arrange them, preview the animation, and export as PNG sprite sheet or animated GIF."
+                    : "Gere frames com IA, organize-os, prévia da animação e exporte como PNG sprite sheet ou GIF animado."}
+                </p>
+              </div>
+              <SpritesheetSlicer />
+            </div>
+          )}
+
+          {/* [2] SpriteSheet Generator */}
+          {(activeTool === t.sidebar.tools[2] || activeTool === t.sidebar.tools[3]) && (
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AIGenerationPanel />
+              <MainWorkspace />
+            </div>
+          )}
+
+          {/* [4] Pixel Editor */}
+          {activeTool === t.sidebar.tools[4] && (
             <div className="grid lg:grid-cols-2 gap-6">
               <PixelEditor />
               <MainWorkspace />
             </div>
           )}
-          
-          {activeTool === t.sidebar.tools[4] && (
+
+          {/* [5] Procedural Map Generator */}
+          {activeTool === t.sidebar.tools[5] && (
             <div className="max-w-5xl mx-auto">
               <ProceduralGenerator />
             </div>
           )}
-          
-          {activeTool === t.sidebar.tools[5] && (
-            <div className="max-w-5xl mx-auto">
-              <PixelEditor />
+
+          {/* [6] Export Center */}
+          {activeTool === t.sidebar.tools[6] && (
+            <div className="max-w-4xl mx-auto">
+              <ExportCenter />
             </div>
           )}
-          
-          {activeTool === t.sidebar.tools[6] && (
+
+          {/* [7] Community */}
+          {activeTool === t.sidebar.tools[7] && (
             <CommunityGallery />
           )}
-          
-          {activeTool === t.sidebar.tools[7] && (
+
+          {/* [8] (extra if any) */}
+          {activeTool === t.sidebar.tools[8] && (
             <div className="max-w-3xl mx-auto">
               <div className="bg-card border border-border rounded-xl p-8">
                 <h3 className="text-lg font-semibold mb-4">AI Prompt History</h3>
@@ -503,12 +535,6 @@ export default function PixelDoxaApp() {
                   ))}
                 </div>
               </div>
-            </div>
-          )}
-          
-          {activeTool === t.sidebar.tools[8] && (
-            <div className="max-w-4xl mx-auto">
-              <ExportCenter />
             </div>
           )}
         </div>
