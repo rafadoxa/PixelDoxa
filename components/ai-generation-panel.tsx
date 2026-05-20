@@ -4,7 +4,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Sparkles, Wand2, RefreshCw, Download, Check,
-  AlertCircle, ImageIcon, Zap, Loader2
+  AlertCircle, ImageIcon, Zap, Loader2, ExternalLink, WalletMinimal
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -64,14 +64,26 @@ export function AIGenerationPanel() {
   const [error, setError]                       = useState<string | null>(null)
   const [copied, setCopied]                     = useState(false)
   const [generationTime, setGenerationTime]     = useState<number | null>(null)
+  const [errorType, setErrorType]               = useState<"balance" | "key" | "timeout" | "generic" | null>(null)
 
   const selectedPaletteData = PALETTES.find(p => p.id === palette) || PALETTES[0]
+
+  // ── Classify API errors into user-friendly types ──
+  const classifyError = (message: string): "balance" | "key" | "timeout" | "generic" => {
+    const m = message.toLowerCase()
+    if (m.includes("exhausted") || m.includes("balance") || m.includes("billing") || m.includes("locked")) return "balance"
+    if (m.includes("forbidden") || m.includes("401") || m.includes("403") || m.includes("unauthorized") || m.includes("invalid key")) return "balance" // forbidden = expired/empty balance
+    if (m.includes("timeout") || m.includes("timed out")) return "timeout"
+    if (m.includes("key") || m.includes("credentials")) return "key"
+    return "generic"
+  }
 
   // ── Generate ──
   const handleGenerate = async () => {
     if (!prompt.trim()) return
     setIsGenerating(true)
     setError(null)
+    setErrorType(null)
     setGeneratedImage(null)
     setGenerationTime(null)
     const start = Date.now()
@@ -87,7 +99,9 @@ export function AIGenerationPanel() {
       setGeneratedImage(data.imageUrl)
       setGenerationTime(Math.round((Date.now() - start) / 1000))
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong")
+      const msg = err instanceof Error ? err.message : "Something went wrong"
+      setError(msg)
+      setErrorType(classifyError(msg))
     } finally {
       setIsGenerating(false)
     }
@@ -334,22 +348,91 @@ export function AIGenerationPanel() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 flex items-start gap-3"
+              className={`rounded-xl border p-4 ${
+                errorType === "balance"
+                  ? "border-amber-500/30 bg-amber-500/5"
+                  : "border-destructive/30 bg-destructive/5"
+              }`}
             >
-              <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-destructive">
-                  {lang === "pt" ? "Erro na geração" : "Generation error"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">{error}</p>
-                <button
-                  onClick={handleGenerate}
-                  className="text-xs text-accent hover:underline mt-2 flex items-center gap-1"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                  {lang === "pt" ? "Tentar novamente" : "Try again"}
-                </button>
-              </div>
+              {/* Balance / Forbidden error — special treatment */}
+              {errorType === "balance" ? (
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+                      <WalletMinimal className="w-4 h-4 text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-amber-400">
+                        {lang === "pt" ? "Geração de IA indisponível" : "AI Generation unavailable"}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        {lang === "pt"
+                          ? "Saldo da conta fal.ai esgotado. Recarregue os créditos para continuar gerando pixel art com IA."
+                          : "fal.ai account balance exhausted. Top up credits to continue generating pixel art with AI."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex flex-col gap-2 pl-12">
+                    <a
+                      href="https://fal.ai/dashboard/billing"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-medium transition-all"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      {lang === "pt" ? "Recarregar créditos em fal.ai/dashboard/billing" : "Top up at fal.ai/dashboard/billing"}
+                    </a>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-px bg-border" />
+                      <span className="text-[10px] text-muted-foreground">
+                        {lang === "pt" ? "após recarregar" : "after topping up"}
+                      </span>
+                      <div className="flex-1 h-px bg-border" />
+                    </div>
+                    <button
+                      onClick={handleGenerate}
+                      className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg border border-border hover:border-accent/40 hover:text-accent text-muted-foreground text-xs transition-all"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      {lang === "pt" ? "Tentar novamente" : "Try again"}
+                    </button>
+                  </div>
+
+                  {/* Tip */}
+                  <div className="ml-12 p-2.5 rounded-lg bg-secondary/50 border border-border">
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                      <span className="text-accent font-medium">💡 {lang === "pt" ? "Dica:" : "Tip:"}</span>{" "}
+                      {lang === "pt"
+                        ? "$5 de crédito gera ~600 imagens. Flux Schnell custa ~$0.003 por imagem."
+                        : "$5 in credits generates ~600 images. Flux Schnell costs ~$0.003 per image."}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Generic / other errors */
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-destructive">
+                      {lang === "pt" ? "Erro na geração" : "Generation error"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {errorType === "timeout"
+                        ? (lang === "pt" ? "A geração demorou muito. Tente novamente." : "Generation timed out. Please try again.")
+                        : error}
+                    </p>
+                    <button
+                      onClick={handleGenerate}
+                      className="text-xs text-accent hover:underline mt-2 flex items-center gap-1"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      {lang === "pt" ? "Tentar novamente" : "Try again"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 
