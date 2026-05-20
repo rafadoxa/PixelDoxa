@@ -840,7 +840,7 @@ export const PIXEL_SPRITES = {
   },
 }
 
-export { PALETTES, AnimatedSprite }
+export { PALETTES }
 
 // Alias for backwards compatibility
 export { HeroPixelArt as PixelScene }
