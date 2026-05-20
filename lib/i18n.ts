@@ -180,6 +180,7 @@ export const translations = {
       tools: [
         "Character Generator",
         "Sprite Sheet Slicer",
+        "Tileset Forge",
         "SpriteSheet Generator",
         "Tileset Generator",
         "Pixel Editor",
@@ -375,6 +376,7 @@ export const translations = {
       tools: [
         "Gerador de Personagens",
         "Sprite Sheet Slicer",
+        "Tileset Forge",
         "Gerador de SpriteSheet",
         "Gerador de Tileset",
         "Editor de Pixel",
