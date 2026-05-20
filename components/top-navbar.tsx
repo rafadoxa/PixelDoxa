@@ -12,10 +12,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 const navLinks = [
-  { label: "Recursos", href: "#" },
-  { label: "Galeria", href: "#" },
+  { label: "Features", href: "#" },
+  { label: "Gallery", href: "#" },
   { label: "Docs", href: "#" },
-  { label: "Preços", href: "#" },
+  { label: "Pricing", href: "#" },
 ]
 
 interface TopNavbarProps {
@@ -82,7 +82,7 @@ export function TopNavbar({ onMenuClick, isDarkMode, toggleDarkMode }: TopNavbar
         <div className="relative w-full group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar sprites, tilesets, personagens..."
+            placeholder="Search sprites, tilesets, characters..."
             className="pl-10 pr-16 bg-secondary/50 border-border focus:bg-secondary focus:border-accent/50 transition-colors"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-muted-foreground">
@@ -131,10 +131,10 @@ export function TopNavbar({ onMenuClick, isDarkMode, toggleDarkMode }: TopNavbar
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem>Meu Perfil</DropdownMenuItem>
-            <DropdownMenuItem>Meus Projetos</DropdownMenuItem>
-            <DropdownMenuItem>Configurações</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">Sair</DropdownMenuItem>
+            <DropdownMenuItem>My Profile</DropdownMenuItem>
+            <DropdownMenuItem>My Projects</DropdownMenuItem>
+            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive">Sign Out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 

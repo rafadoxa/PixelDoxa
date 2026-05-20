@@ -48,17 +48,17 @@ const engines = [
 ]
 
 const formats = [
-  { id: "png", icon: Image, label: "PNG", desc: "Imagem com transparência" },
-  { id: "spritesheet", icon: Layers, label: "SpriteSheet", desc: "Todos os frames em uma imagem" },
-  { id: "json", icon: FileJson, label: "JSON", desc: "Dados de animação e metadados" },
-  { id: "tilemap", icon: Folder, label: "Tilemap", desc: "Dados de mapa compatíveis" },
+  { id: "png", icon: Image, label: "PNG", desc: "Image with transparency" },
+  { id: "spritesheet", icon: Layers, label: "SpriteSheet", desc: "All frames in one image" },
+  { id: "json", icon: FileJson, label: "JSON", desc: "Animation and metadata data" },
+  { id: "tilemap", icon: Folder, label: "Tilemap", desc: "Compatible map data" },
 ]
 
 const assets = [
   { id: 1, name: "warrior_idle.png", type: "Sprite", size: "32x32", frames: 4 },
   { id: 2, name: "forest_tileset.png", type: "Tileset", size: "256x256", frames: null },
-  { id: 3, name: "dungeon_map.json", type: "Mapa", size: "64x48", frames: null },
-  { id: 4, name: "slime_attack.png", type: "Animação", size: "48x48", frames: 6 },
+  { id: 3, name: "dungeon_map.json", type: "Map", size: "64x48", frames: null },
+  { id: 4, name: "slime_attack.png", type: "Animation", size: "48x48", frames: 6 },
 ]
 
 export function ExportCenter() {
@@ -89,15 +89,15 @@ export function ExportCenter() {
       <div className="flex items-center gap-2 p-4 border-b border-border bg-secondary/30">
         <Download className="w-4 h-4 text-accent" />
         <div>
-          <h3 className="text-sm font-semibold">Central de Exportação</h3>
-          <p className="text-xs text-muted-foreground">Exporte para diferentes engines e formatos</p>
+          <h3 className="text-sm font-semibold">Export Center</h3>
+          <p className="text-xs text-muted-foreground">Export to different engines and formats</p>
         </div>
       </div>
 
       <div className="p-4 space-y-5">
         {/* Engine Selection */}
         <div className="space-y-2">
-          <Label className="text-xs">Engine de Destino</Label>
+          <Label className="text-xs">Target Engine</Label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {engines.map((engine) => (
               <button
@@ -128,7 +128,7 @@ export function ExportCenter() {
 
         {/* Format Selection */}
         <div className="space-y-2">
-          <Label className="text-xs">Formatos de Exportação</Label>
+          <Label className="text-xs">Export Formats</Label>
           <div className="grid grid-cols-2 gap-2">
             {formats.map((format) => {
               const Icon = format.icon
@@ -166,14 +166,14 @@ export function ExportCenter() {
         {/* Asset List */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="text-xs">Assets para Exportar</Label>
+            <Label className="text-xs">Assets to Export</Label>
             <Button
               variant="ghost"
               size="sm"
               className="h-6 text-xs"
               onClick={() => setSelectedAssets(selectedAssets.length === assets.length ? [] : assets.map(a => a.id))}
             >
-              {selectedAssets.length === assets.length ? "Limpar" : "Selecionar Todos"}
+              {selectedAssets.length === assets.length ? "Clear" : "Select All"}
             </Button>
           </div>
           <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -204,7 +204,7 @@ export function ExportCenter() {
         {/* Export Button */}
         <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground glow-accent">
           <Download className="w-4 h-4 mr-2" />
-          Exportar {selectedAssets.length} Assets
+          Export {selectedAssets.length} Assets
           <ChevronDown className="w-4 h-4 ml-2" />
         </Button>
 
@@ -216,11 +216,11 @@ export function ExportCenter() {
           </div>
           <div className="text-center">
             <div className="text-lg font-bold text-foreground">{selectedFormats.length}</div>
-            <div className="text-xs text-muted-foreground">Formatos</div>
+            <div className="text-xs text-muted-foreground">Formats</div>
           </div>
           <div className="text-center">
             <div className="text-lg font-bold text-foreground">~2.4MB</div>
-            <div className="text-xs text-muted-foreground">Tamanho Est.</div>
+            <div className="text-xs text-muted-foreground">Est. Size</div>
           </div>
         </div>
       </div>

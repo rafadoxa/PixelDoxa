@@ -1,67 +1,114 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { 
   Play, 
+  Pause, 
+  SkipBack, 
+  SkipForward, 
+  Layers, 
+  RefreshCw,
+  Upload,
   Download,
-  Layers,
-  Grid3X3,
-  ChevronRight,
   Sparkles,
-  FileDown,
-  Maximize2,
+  Check,
+  ChevronRight,
+  Zap,
+  Target,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
+  Copy,
+  Trash2,
+  Plus,
   Settings,
-  Folder
+  Grid3X3
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// Spritesheet showcase images
-const SPRITESHEET_VIEWS = {
-  detailed: {
-    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/4-Af9EvzdaCbqbQAWxgLW8KEdiD7XLka.png",
-    title: "Character Editor View",
-    description: "Full spritesheet editor with character previews and frame data"
-  },
-  grid: {
-    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2-0gQx66uNfyjlQPNPEkZD1hff3L8vk7.png",
-    title: "Animation Grid View",
-    description: "Organized animation rows with export controls"
-  },
-  horizontal: {
-    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/3-UdD6zHTMPNOaH8gZtalYRUXJhpKPT9.png",
-    title: "Frame Breakdown View",
-    description: "Detailed frame counts per animation type"
-  }
-}
-
-// Character data for the detailed view
-const CHARACTERS = [
-  { name: "Knight", pack: "RPG Core", grid: "48x48px", animations: ["IDLE", "WALK", "ATTACK"] },
-  { name: "Rogue", pack: "RPG Core", grid: "32x32px", animations: ["IDLE", "WALK", "ATTACK"] },
-  { name: "Mage", pack: "RPG Core", grid: "48x48px", animations: ["IDLE", "WALK", "ATTACK"] },
-  { name: "Sci-Fi Soldier", pack: "Sci-Fi Pack", grid: "32x32px", animations: ["IDLE", "WALK", "ATTACK"] },
+// Animation types with frame data
+const ANIMATION_TYPES = [
+  { id: "idle", name: "Idle", frames: 8, fps: 8, color: "#22c55e" },
+  { id: "walk", name: "Walk", frames: 8, fps: 12, color: "#3b82f6" },
+  { id: "attack", name: "Attack", frames: 10, fps: 15, color: "#ef4444" },
+  { id: "dash", name: "Dash", frames: 6, fps: 20, color: "#8b5cf6" },
+  { id: "hurt", name: "Hurt", frames: 4, fps: 10, color: "#f59e0b" },
+  { id: "death", name: "Death", frames: 10, fps: 8, color: "#6b7280" },
 ]
 
-// Export formats
-const EXPORT_FORMATS = [
-  { name: "PNG Spritesheet", ext: ".png", popular: true },
-  { name: "Aseprite", ext: ".ase", popular: true },
-  { name: "JSON Atlas", ext: ".json", popular: false },
-  { name: "GIF Animation", ext: ".gif", popular: false },
+// Timeline layers
+const LAYERS = [
+  { id: "body", name: "Body", visible: true, locked: false },
+  { id: "cloak", name: "Cloak", visible: true, locked: false },
+  { id: "weapon", name: "Weapon", visible: true, locked: false },
+  { id: "vfx", name: "VFX", visible: true, locked: false },
+]
+
+// Features to highlight
+const PIPELINE_FEATURES = [
+  {
+    icon: Sparkles,
+    title: "Text-to-Animation",
+    description: "Descreva a animacao e gere frames consistentes automaticamente"
+  },
+  {
+    icon: Target,
+    title: "Character Coherence",
+    description: "Mantenha consistencia visual entre todos os frames gerados"
+  },
+  {
+    icon: RefreshCw,
+    title: "Regenerate Frames",
+    description: "Regenere frames individuais sem afetar o resto da animacao"
+  },
+  {
+    icon: Upload,
+    title: "Upload Concepts",
+    description: "Importe seus proprios designs e gere animacoes a partir deles"
+  },
+  {
+    icon: Grid3X3,
+    title: "Spritesheet Export",
+    description: "Exporte spritesheets otimizados para qualquer game engine"
+  },
+  {
+    icon: Layers,
+    title: "Layer System",
+    description: "Edite camadas separadas: corpo, roupa, armas, efeitos"
+  },
 ]
 
 export function AnimationPipeline() {
-  const [activeView, setActiveView] = useState<keyof typeof SPRITESHEET_VIEWS>("detailed")
-  const [selectedCharacter, setSelectedCharacter] = useState(0)
-  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [selectedAnimation, setSelectedAnimation] = useState(ANIMATION_TYPES[2]) // Attack
+  const [currentFrame, setCurrentFrame] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(true)
+  const [selectedFrames, setSelectedFrames] = useState<number[]>([])
+  const [layers, setLayers] = useState(LAYERS)
+  const [zoom, setZoom] = useState(100)
+
+  // Animation playback
+  useEffect(() => {
+    if (!isPlaying) return
+    const interval = setInterval(() => {
+      setCurrentFrame((prev) => (prev + 1) % selectedAnimation.frames)
+    }, 1000 / selectedAnimation.fps)
+    return () => clearInterval(interval)
+  }, [isPlaying, selectedAnimation])
+
+  const toggleLayer = (layerId: string, property: 'visible' | 'locked') => {
+    setLayers(layers.map(l => 
+      l.id === layerId ? { ...l, [property]: !l[property] } : l
+    ))
+  }
 
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
       <div 
-        className="absolute inset-0 opacity-[0.015]"
+        className="absolute inset-0 opacity-[0.02]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
@@ -81,12 +128,12 @@ export function AnimationPipeline() {
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4 text-balance">
             Workflow de{" "}
-            <span className="text-accent">Producao</span>{" "}
+            <span className="text-accent">Animacao</span>{" "}
             Profissional
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg text-pretty">
-            Pipeline de animacao para desenvolvedores indie. 
-            Organize, edite e exporte spritesheets game-ready.
+            Pipeline completo para criar spritesheets animados game-ready. 
+            Da concepcao ao export em minutos.
           </p>
         </motion.div>
 
@@ -107,322 +154,383 @@ export function AnimationPipeline() {
                 <div className="w-3 h-3 rounded-full bg-green-500" />
               </div>
               <div className="h-4 w-px bg-border" />
-              <span className="text-sm font-medium">Spritesheet Pipeline</span>
+              <span className="text-sm font-medium">Animation Editor</span>
               <span className="px-2 py-0.5 bg-accent/20 text-accent text-xs rounded">PRO</span>
             </div>
             <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setIsFullscreen(!isFullscreen)}
-                className="p-2 hover:bg-secondary rounded-lg transition-colors"
-              >
-                <Maximize2 className="w-4 h-4 text-muted-foreground" />
-              </button>
               <button className="p-2 hover:bg-secondary rounded-lg transition-colors">
                 <Settings className="w-4 h-4 text-muted-foreground" />
               </button>
               <button className="px-3 py-1.5 bg-accent text-accent-foreground rounded-lg text-sm font-medium flex items-center gap-2">
                 <Download className="w-4 h-4" />
-                Export All
+                Export
               </button>
             </div>
           </div>
 
           <div className="flex flex-col lg:flex-row">
-            {/* Left Sidebar - Project Structure */}
-            <div className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-border bg-card/30">
-              {/* View Switcher */}
-              <div className="p-4 border-b border-border">
-                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">View Mode</div>
-                <div className="space-y-1">
-                  {(Object.keys(SPRITESHEET_VIEWS) as Array<keyof typeof SPRITESHEET_VIEWS>).map((view) => (
-                    <button
-                      key={view}
-                      onClick={() => setActiveView(view)}
-                      className={cn(
-                        "w-full p-2.5 rounded-lg text-left transition-all flex items-center gap-3",
-                        activeView === view
-                          ? "bg-accent/10 border border-accent/30"
-                          : "hover:bg-secondary/50 border border-transparent"
-                      )}
-                    >
-                      <Grid3X3 className={cn(
-                        "w-4 h-4",
-                        activeView === view ? "text-accent" : "text-muted-foreground"
-                      )} />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{SPRITESHEET_VIEWS[view].title}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Asset Pack Info */}
-              <div className="p-4 border-b border-border">
-                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Asset Pack</div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
-                    <Folder className="w-4 h-4 text-accent" />
-                    <span className="text-sm">RPG Core Pack</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2 rounded bg-secondary/20">
-                      <div className="text-muted-foreground">Characters</div>
-                      <div className="font-medium">4</div>
-                    </div>
-                    <div className="p-2 rounded bg-secondary/20">
-                      <div className="text-muted-foreground">Animations</div>
-                      <div className="font-medium">12</div>
-                    </div>
-                    <div className="p-2 rounded bg-secondary/20">
-                      <div className="text-muted-foreground">Total Frames</div>
-                      <div className="font-medium">156</div>
-                    </div>
-                    <div className="p-2 rounded bg-secondary/20">
-                      <div className="text-muted-foreground">Grid Size</div>
-                      <div className="font-medium">32-48px</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Character List */}
-              <div className="p-4">
-                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Characters</div>
-                <div className="space-y-1">
-                  {CHARACTERS.map((char, i) => (
-                    <button
-                      key={char.name}
-                      onClick={() => setSelectedCharacter(i)}
-                      className={cn(
-                        "w-full p-2.5 rounded-lg text-left transition-all",
-                        selectedCharacter === i
-                          ? "bg-accent/10 border border-accent/30"
-                          : "hover:bg-secondary/50 border border-transparent"
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{char.name}</span>
-                        <span className="text-[10px] text-muted-foreground">{char.grid}</span>
-                      </div>
-                      <div className="flex gap-1 mt-1">
-                        {char.animations.map((anim) => (
-                          <span 
-                            key={anim} 
-                            className="text-[9px] px-1.5 py-0.5 bg-secondary/50 rounded text-muted-foreground"
-                          >
-                            {anim}
-                          </span>
-                        ))}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Center - Main Preview */}
-            <div className="flex-1 flex flex-col min-h-[500px] lg:min-h-[600px]">
-              {/* Preview Header */}
-              <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/20">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium">{SPRITESHEET_VIEWS[activeView].title}</span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{SPRITESHEET_VIEWS[activeView].description}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Engine Target:</span>
-                  <span className="text-xs font-medium text-accent">Godot/Unity</span>
-                </div>
-              </div>
-
-              {/* Main Spritesheet Preview */}
-              <div className="flex-1 relative overflow-hidden bg-[#1a1d23]">
-                {/* Subtle grid pattern */}
-                <div 
-                  className="absolute inset-0 opacity-10"
-                  style={{
-                    backgroundImage: `
-                      linear-gradient(to right, #333 1px, transparent 1px),
-                      linear-gradient(to bottom, #333 1px, transparent 1px)
-                    `,
-                    backgroundSize: '32px 32px'
-                  }}
-                />
-
-                {/* Spritesheet Image */}
-                <motion.div
-                  key={activeView}
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  className="absolute inset-0 flex items-center justify-center p-4"
-                >
-                  <img
-                    src={SPRITESHEET_VIEWS[activeView].url}
-                    alt={SPRITESHEET_VIEWS[activeView].title}
-                    className="max-w-full max-h-full object-contain rounded-lg"
-                    style={{ imageRendering: "pixelated" }}
-                  />
-                </motion.div>
-
-                {/* Floating UI Overlays */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="absolute top-4 left-4 flex flex-col gap-2"
-                >
-                  <div className="px-3 py-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-muted-foreground">Status:</span>
-                      <span className="font-medium text-green-400">Ready to Export</span>
-                    </div>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="absolute top-4 right-4 flex flex-col gap-2"
-                >
-                  <div className="px-3 py-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">Grid:</span>
-                      <span className="font-medium">32x32px</span>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Bottom Timeline Bar */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="absolute bottom-4 left-4 right-4"
-                >
-                  <div className="px-4 py-3 bg-card/90 backdrop-blur-sm rounded-xl border border-border">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <button className="p-2 bg-accent rounded-lg hover:bg-accent/90 transition-colors">
-                          <Play className="w-4 h-4 text-accent-foreground" />
-                        </button>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">Animation Preview</span>
-                          <div className="flex gap-1">
-                            {Array.from({ length: 8 }).map((_, i) => (
-                              <div 
-                                key={i} 
-                                className={cn(
-                                  "w-6 h-1 rounded-full transition-colors",
-                                  i < 3 ? "bg-accent" : "bg-border"
-                                )}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs font-medium">8 FPS</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Loop</span>
-                        <div className="w-8 h-4 bg-accent/30 rounded-full relative">
-                          <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-accent rounded-full" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-
-            {/* Right Sidebar - Export Panel */}
-            <div className="w-full lg:w-56 border-t lg:border-t-0 lg:border-l border-border bg-card/30 p-4">
-              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Export Options</div>
-              
-              {/* Format Selection */}
-              <div className="space-y-2 mb-6">
-                {EXPORT_FORMATS.map((format) => (
+            {/* Left Panel - Animation Types */}
+            <div className="w-full lg:w-56 border-b lg:border-b-0 lg:border-r border-border p-4 bg-card/30">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Animations</div>
+              <div className="space-y-1">
+                {ANIMATION_TYPES.map((anim) => (
                   <button
-                    key={format.name}
-                    className="w-full p-2.5 rounded-lg border border-border hover:border-accent/50 transition-all flex items-center justify-between bg-secondary/20 hover:bg-secondary/40"
+                    key={anim.id}
+                    onClick={() => {
+                      setSelectedAnimation(anim)
+                      setCurrentFrame(0)
+                    }}
+                    className={cn(
+                      "w-full p-3 rounded-lg text-left transition-all flex items-center gap-3",
+                      selectedAnimation.id === anim.id
+                        ? "bg-accent/10 border border-accent/30"
+                        : "hover:bg-secondary/50 border border-transparent"
+                    )}
                   >
-                    <div className="flex items-center gap-2">
-                      <FileDown className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{format.name}</span>
+                    <div 
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: anim.color }}
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">{anim.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {anim.frames} frames @ {anim.fps}fps
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      {format.popular && (
-                        <span className="text-[9px] px-1.5 py-0.5 bg-accent/20 text-accent rounded">Popular</span>
-                      )}
-                      <span className="text-xs text-muted-foreground">{format.ext}</span>
-                    </div>
+                    {selectedAnimation.id === anim.id && (
+                      <Check className="w-4 h-4 text-accent" />
+                    )}
                   </button>
                 ))}
               </div>
 
-              {/* Quick Export */}
-              <div className="space-y-2">
-                <button className="w-full p-3 rounded-lg bg-accent text-accent-foreground font-medium flex items-center justify-center gap-2 hover:bg-accent/90 transition-colors">
-                  <Download className="w-4 h-4" />
-                  Export Spritesheet
-                </button>
-                <button className="w-full p-2.5 rounded-lg border border-border hover:border-accent/50 transition-colors flex items-center justify-center gap-2 text-sm">
-                  <Sparkles className="w-4 h-4 text-accent" />
-                  Generate Variations
-                </button>
+              {/* Add Animation Button */}
+              <button className="w-full mt-3 p-3 rounded-lg border border-dashed border-border hover:border-accent/50 transition-colors flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+                <Plus className="w-4 h-4" />
+                Add Animation
+              </button>
+            </div>
+
+            {/* Center - Preview & Timeline */}
+            <div className="flex-1 flex flex-col">
+              {/* Preview Area */}
+              <div className="flex-1 p-6 flex items-center justify-center min-h-[300px] lg:min-h-[400px] relative">
+                {/* Checkerboard background */}
+                <div 
+                  className="absolute inset-6 rounded-xl opacity-20"
+                  style={{
+                    backgroundImage: `
+                      linear-gradient(45deg, #333 25%, transparent 25%),
+                      linear-gradient(-45deg, #333 25%, transparent 25%),
+                      linear-gradient(45deg, transparent 75%, #333 75%),
+                      linear-gradient(-45deg, transparent 75%, #333 75%)
+                    `,
+                    backgroundSize: '20px 20px',
+                    backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
+                  }}
+                />
+
+                {/* Sprite Preview */}
+                <motion.div
+                  key={`${selectedAnimation.id}-${currentFrame}`}
+                  initial={{ scale: 0.95, opacity: 0.5 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="relative z-10"
+                >
+                  <div 
+                    className="relative overflow-hidden rounded-lg"
+                    style={{ 
+                      width: `${zoom * 1.5}px`, 
+                      height: `${zoom * 1.5}px`,
+                    }}
+                  >
+                    <img
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1-i3jLlgkcUa7CEkye7AcwXp0q4wAfQm.png"
+                      alt="Animation Preview"
+                      className="w-full h-full object-cover"
+                      style={{ 
+                        imageRendering: "pixelated",
+                        objectPosition: `${-currentFrame * 12.5}% ${selectedAnimation.id === 'idle' ? '0%' : selectedAnimation.id === 'walk' ? '16.6%' : selectedAnimation.id === 'attack' ? '33.3%' : selectedAnimation.id === 'dash' ? '50%' : selectedAnimation.id === 'hurt' ? '66.6%' : '83.3%'}`
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Frame indicator */}
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-3 py-1 bg-card rounded-full border border-border text-xs">
+                    Frame {currentFrame + 1} / {selectedAnimation.frames}
+                  </div>
+                </motion.div>
+
+                {/* Zoom controls */}
+                <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-lg p-1 border border-border">
+                  <button 
+                    onClick={() => setZoom(Math.max(50, zoom - 25))}
+                    className="p-1.5 hover:bg-secondary rounded transition-colors text-xs"
+                  >
+                    -
+                  </button>
+                  <span className="text-xs w-12 text-center">{zoom}%</span>
+                  <button 
+                    onClick={() => setZoom(Math.min(200, zoom + 25))}
+                    className="p-1.5 hover:bg-secondary rounded transition-colors text-xs"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
 
-              {/* Export Stats */}
+              {/* Timeline */}
+              <div className="border-t border-border bg-card/50 p-4">
+                {/* Playback controls */}
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={() => setCurrentFrame(0)}
+                      className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                    >
+                      <SkipBack className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => setIsPlaying(!isPlaying)}
+                      className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                    >
+                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    </button>
+                    <button 
+                      onClick={() => setCurrentFrame(selectedAnimation.frames - 1)}
+                      className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                    >
+                      <SkipForward className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  <div className="h-4 w-px bg-border" />
+                  
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">FPS:</span>
+                    <span className="font-medium">{selectedAnimation.fps}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">Duration:</span>
+                    <span className="font-medium">
+                      {((selectedAnimation.frames / selectedAnimation.fps) * 1000).toFixed(0)}ms
+                    </span>
+                  </div>
+
+                  <div className="flex-1" />
+
+                  <div className="flex items-center gap-1">
+                    <button className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                      <Copy className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+                    <button className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-red-400">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Timeline frames */}
+                <div className="relative">
+                  {/* Frame ruler */}
+                  <div className="flex mb-2">
+                    {Array.from({ length: selectedAnimation.frames }).map((_, i) => (
+                      <div key={i} className="flex-1 text-center text-[10px] text-muted-foreground">
+                        {i + 1}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Frame thumbnails */}
+                  <div className="flex gap-1">
+                    {Array.from({ length: selectedAnimation.frames }).map((_, i) => (
+                      <motion.button
+                        key={i}
+                        onClick={() => {
+                          setCurrentFrame(i)
+                          setIsPlaying(false)
+                        }}
+                        className={cn(
+                          "flex-1 aspect-square rounded-lg border-2 transition-all relative overflow-hidden",
+                          currentFrame === i
+                            ? "border-accent ring-2 ring-accent/30"
+                            : selectedFrames.includes(i)
+                            ? "border-accent/50"
+                            : "border-border hover:border-muted-foreground"
+                        )}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <div 
+                          className="w-full h-full"
+                          style={{ 
+                            backgroundColor: `${selectedAnimation.color}20`,
+                          }}
+                        />
+                        {currentFrame === i && (
+                          <motion.div
+                            layoutId="frameIndicator"
+                            className="absolute inset-0 border-2 border-accent rounded-lg"
+                          />
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+
+                  {/* Playhead */}
+                  <motion.div
+                    className="absolute top-0 w-0.5 h-full bg-accent pointer-events-none"
+                    style={{
+                      left: `${(currentFrame / selectedAnimation.frames) * 100}%`,
+                    }}
+                    animate={{
+                      left: `${(currentFrame / selectedAnimation.frames) * 100}%`,
+                    }}
+                    transition={{ duration: 0.1 }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Panel - Layers */}
+            <div className="w-full lg:w-56 border-t lg:border-t-0 lg:border-l border-border p-4 bg-card/30">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Layers</div>
+              <div className="space-y-1">
+                {layers.map((layer, i) => (
+                  <div
+                    key={layer.id}
+                    className="p-2 rounded-lg bg-secondary/30 flex items-center gap-2"
+                  >
+                    <button 
+                      onClick={() => toggleLayer(layer.id, 'visible')}
+                      className="p-1 hover:bg-secondary rounded transition-colors"
+                    >
+                      {layer.visible ? (
+                        <Eye className="w-3.5 h-3.5 text-accent" />
+                      ) : (
+                        <EyeOff className="w-3.5 h-3.5 text-muted-foreground" />
+                      )}
+                    </button>
+                    <button 
+                      onClick={() => toggleLayer(layer.id, 'locked')}
+                      className="p-1 hover:bg-secondary rounded transition-colors"
+                    >
+                      {layer.locked ? (
+                        <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                      ) : (
+                        <Unlock className="w-3.5 h-3.5 text-accent" />
+                      )}
+                    </button>
+                    <span className="text-sm flex-1">{layer.name}</span>
+                    <div 
+                      className="w-3 h-3 rounded"
+                      style={{ 
+                        backgroundColor: ['#ef4444', '#3b82f6', '#8b5cf6', '#22c55e'][i] 
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick actions */}
               <div className="mt-6 pt-4 border-t border-border">
-                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Export Summary</div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Characters</span>
-                    <span className="font-medium">4</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Frames</span>
-                    <span className="font-medium">156</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Est. Size</span>
-                    <span className="font-medium">~2.4 MB</span>
-                  </div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Quick Actions</div>
+                <div className="space-y-2">
+                  <button className="w-full p-2 rounded-lg bg-accent/10 border border-accent/30 text-sm flex items-center gap-2 hover:bg-accent/20 transition-colors">
+                    <RefreshCw className="w-4 h-4 text-accent" />
+                    Regenerate Frame
+                  </button>
+                  <button className="w-full p-2 rounded-lg bg-secondary/50 border border-border text-sm flex items-center gap-2 hover:bg-secondary transition-colors">
+                    <Upload className="w-4 h-4" />
+                    Import Reference
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Features below the editor */}
+        {/* Features Grid */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4"
+          transition={{ delay: 0.4 }}
+          className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-          {[
-            { label: "Characters", value: "4", sublabel: "in pack" },
-            { label: "Animations", value: "12", sublabel: "total" },
-            { label: "Frames", value: "156", sublabel: "generated" },
-            { label: "Export", value: "4", sublabel: "formats" },
-          ].map((stat, i) => (
+          {PIPELINE_FEATURES.map((feature, i) => (
             <motion.div
-              key={stat.label}
+              key={feature.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.4 + i * 0.1 }}
-              className="p-4 rounded-xl bg-card/50 border border-border text-center"
+              transition={{ delay: 0.5 + i * 0.1 }}
+              className="p-5 rounded-xl bg-card/50 border border-border hover:border-accent/30 transition-all group"
             >
-              <div className="text-2xl md:text-3xl font-bold text-accent">{stat.value}</div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
-              <div className="text-xs text-muted-foreground/60">{stat.sublabel}</div>
+              <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+                <feature.icon className="w-5 h-5 text-accent" />
+              </div>
+              <h3 className="font-semibold mb-2">{feature.title}</h3>
+              <p className="text-sm text-muted-foreground">{feature.description}</p>
             </motion.div>
           ))}
+        </motion.div>
+
+        {/* Spritesheet Preview */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.6 }}
+          className="mt-16"
+        >
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold mb-2">Spritesheet Export</h3>
+            <p className="text-muted-foreground">Exporte animacoes completas em formato otimizado para sua engine</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Spritesheet 1 */}
+            <div className="rounded-xl border border-border overflow-hidden bg-card/50">
+              <div className="p-3 border-b border-border bg-card/80 flex items-center justify-between">
+                <span className="text-sm font-medium">arcane_knight_spritesheet.png</span>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>1024x768</span>
+                  <span>64 frames</span>
+                </div>
+              </div>
+              <div className="p-4">
+                <img
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1-i3jLlgkcUa7CEkye7AcwXp0q4wAfQm.png"
+                  alt="Arcane Knight Spritesheet"
+                  className="w-full h-auto rounded-lg"
+                  style={{ imageRendering: "pixelated" }}
+                />
+              </div>
+            </div>
+
+            {/* Spritesheet 2 */}
+            <div className="rounded-xl border border-border overflow-hidden bg-card/50">
+              <div className="p-3 border-b border-border bg-card/80 flex items-center justify-between">
+                <span className="text-sm font-medium">royal_vanguard_spritesheet.png</span>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>1024x768</span>
+                  <span>56 frames</span>
+                </div>
+              </div>
+              <div className="p-4">
+                <img
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2-CsuGRMdjgj0c2qo0pC8A6GhYZ3wvwt.png"
+                  alt="Royal Vanguard Spritesheet"
+                  className="w-full h-auto rounded-lg"
+                  style={{ imageRendering: "pixelated" }}
+                />
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

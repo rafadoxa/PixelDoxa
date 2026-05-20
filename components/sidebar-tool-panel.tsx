@@ -26,24 +26,24 @@ import { PixelSprite, PIXEL_SPRITES } from "@/components/pixel-art-showcase"
 import { cn } from "@/lib/utils"
 
 const tools = [
-  { icon: User, label: "Gerador de Personagens", active: true },
-  { icon: Grid3X3, label: "Gerador de SpriteSheet" },
-  { icon: Layers, label: "Gerador de Tileset" },
-  { icon: Play, label: "Criador de Animações" },
-  { icon: Map, label: "Gerador Procedural de Mapas" },
-  { icon: Palette, label: "Editor de Pixels" },
-  { icon: FolderOpen, label: "Biblioteca de Assets" },
-  { icon: History, label: "Histórico de Prompts IA" },
-  { icon: Download, label: "Central de Exportação" },
+  { icon: User, label: "Character Generator", active: true },
+  { icon: Grid3X3, label: "SpriteSheet Generator" },
+  { icon: Layers, label: "Tileset Generator" },
+  { icon: Play, label: "Animation Creator" },
+  { icon: Map, label: "Procedural Map Generator" },
+  { icon: Palette, label: "Pixel Editor" },
+  { icon: FolderOpen, label: "Asset Library" },
+  { icon: History, label: "AI Prompt History" },
+  { icon: Download, label: "Export Center" },
 ]
 
 const genres = [
   { icon: Sword, label: "RPG" },
-  { icon: Gamepad2, label: "Plataforma" },
+  { icon: Gamepad2, label: "Platformer" },
   { icon: Ghost, label: "Roguelike" },
   { icon: Trees, label: "Survival" },
   { icon: Rocket, label: "Sci-fi" },
-  { icon: Castle, label: "Fantasia" },
+  { icon: Castle, label: "Fantasy" },
 ]
 
 interface SidebarToolPanelProps {
@@ -81,7 +81,7 @@ export function SidebarToolPanel({ activeTool, setActiveTool }: SidebarToolPanel
       <div className="flex-1 overflow-y-auto p-3">
         <div className="mb-4">
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
-            Ferramentas
+            Tools
           </h3>
           <nav className="space-y-1">
             {tools.map((tool) => {
@@ -124,7 +124,7 @@ export function SidebarToolPanel({ activeTool, setActiveTool }: SidebarToolPanel
         {/* Genres Section */}
         <div className="mt-6">
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
-            Gêneros
+            Genres
           </h3>
           <div className="grid grid-cols-2 gap-2 px-2">
             {genres.map((genre) => {
@@ -156,14 +156,14 @@ export function SidebarToolPanel({ activeTool, setActiveTool }: SidebarToolPanel
             <Zap className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium">Upgrade Pro</span>
           </div>
-          <p className="text-xs text-muted-foreground">Gerações ilimitadas + Spritesheets</p>
+          <p className="text-xs text-muted-foreground">Unlimited generations + Spritesheets</p>
         </motion.div>
         
         {/* Credits */}
         <div className="glass rounded-lg p-3">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium">Créditos IA</span>
+            <span className="text-sm font-medium">AI Credits</span>
           </div>
           <div className="w-full bg-secondary rounded-full h-2">
             <motion.div
@@ -173,7 +173,7 @@ export function SidebarToolPanel({ activeTool, setActiveTool }: SidebarToolPanel
               transition={{ duration: 1, delay: 0.5 }}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-1.5">750 / 1000 restantes</p>
+          <p className="text-xs text-muted-foreground mt-1.5">750 / 1000 remaining</p>
         </div>
       </div>
     </motion.aside>

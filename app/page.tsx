@@ -12,6 +12,7 @@ import { ExportCenter } from "@/components/export-center"
 import { CommunityGallery } from "@/components/community-gallery"
 import { PixelDoxaWorkflow } from "@/components/pixeldoxa-workflow"
 import { VideoShowcase } from "@/components/video-showcase"
+import { AnimationPipeline } from "@/components/animation-pipeline"
 import { PixelSprite, PIXEL_SPRITES, PixelScene } from "@/components/pixel-art-showcase"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
@@ -45,6 +46,9 @@ export default function PixelDoxaApp() {
           
           {/* Video Showcase Section */}
           <VideoShowcase />
+          
+          {/* Animation Pipeline Section */}
+          <AnimationPipeline />
           
           {/* Features Section */}
           <section className="py-20 px-4 bg-card/50 relative overflow-hidden">

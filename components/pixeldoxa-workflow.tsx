@@ -444,7 +444,7 @@ function StepPreview({ activeStep }: { activeStep: number }) {
                     className="p-3 rounded-xl bg-card border-2 transition-colors"
                     animate={{ 
                       borderColor: isPlaying && frame === Math.floor(Date.now() / 200) % 4 
-                        ? "oklch(0.65 0.25 180)" 
+                        ? "hsl(180 80% 45%)" 
                         : "transparent",
                       scale: isPlaying && frame === Math.floor(Date.now() / 200) % 4 ? 1.05 : 1
                     }}
@@ -478,7 +478,7 @@ function StepPreview({ activeStep }: { activeStep: number }) {
                     key={i}
                     className="flex-1 h-6 rounded"
                     style={{
-                      backgroundColor: i % 8 < 4 ? "oklch(0.65 0.25 180 / 0.3)" : "oklch(0.65 0.25 180 / 0.1)"
+                      backgroundColor: i % 8 < 4 ? "hsl(180 80% 45% / 0.3)" : "hsl(180 80% 45% / 0.1)"
                     }}
                     animate={isPlaying ? { opacity: [0.5, 1, 0.5] } : {}}
                     transition={{ duration: 0.5, delay: i * 0.03, repeat: Infinity }}

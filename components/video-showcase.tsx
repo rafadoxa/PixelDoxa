@@ -381,8 +381,8 @@ export function VideoShowcase() {
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           style={{
             backgroundImage: `
-              linear-gradient(to right, oklch(0.65 0.25 180) 1px, transparent 1px),
-              linear-gradient(to bottom, oklch(0.65 0.25 180) 1px, transparent 1px)
+              linear-gradient(to right, hsl(180 80% 45%) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(180 80% 45%) 1px, transparent 1px)
             `,
             backgroundSize: '32px 32px'
           }}

@@ -17,22 +17,22 @@ import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
 
 const artStyles = [
-  "Pixel Art Clássico",
+  "Classic Pixel Art",
   "GBA/SNES Style",
-  "Hi-Bit Moderno",
-  "Minimalista",
-  "Detalhado",
+  "Modern Hi-Bit",
+  "Minimalist",
+  "Detailed",
   "Anime Pixel",
 ]
 
 const genres = [
   "RPG",
-  "Plataforma",
+  "Platformer",
   "Metroidvania",
   "Roguelike",
   "Survival",
   "Sci-fi",
-  "Fantasia",
+  "Fantasy",
   "Horror",
 ]
 
@@ -47,20 +47,20 @@ const palettes = [
 
 const perspectives = [
   { id: "topdown", label: "Top-down" },
-  { id: "sideview", label: "Vista Lateral" },
-  { id: "isometric", label: "Isométrico" },
+  { id: "sideview", label: "Side View" },
+  { id: "isometric", label: "Isometric" },
   { id: "34view", label: "3/4 View" },
 ]
 
 const animationTypes = [
-  "Nenhuma",
+  "None",
   "Idle",
-  "Caminhada",
-  "Corrida",
-  "Ataque",
-  "Pulo",
-  "Morte",
-  "Completa",
+  "Walk",
+  "Run",
+  "Attack",
+  "Jump",
+  "Death",
+  "Complete",
 ]
 
 export function AIGenerationPanel() {
@@ -87,8 +87,8 @@ export function AIGenerationPanel() {
           <Sparkles className="w-4 h-4 text-foreground" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold">Painel de Geração IA</h3>
-          <p className="text-xs text-muted-foreground">Descreva seu asset e a IA irá criá-lo</p>
+          <h3 className="text-sm font-semibold">AI Generation Panel</h3>
+          <p className="text-xs text-muted-foreground">Describe your asset and AI will create it</p>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ export function AIGenerationPanel() {
           <Label htmlFor="prompt">Prompt</Label>
           <Textarea
             id="prompt"
-            placeholder="Ex: Um guerreiro medieval com armadura de ferro, segurando uma espada flamejante, estilo fantasia..."
+            placeholder="E.g. A medieval warrior with iron armor, holding a flaming sword, fantasy style..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             className="min-h-[100px] bg-secondary/50 border-border resize-none"
@@ -109,7 +109,7 @@ export function AIGenerationPanel() {
         <div className="grid grid-cols-2 gap-4">
           {/* Art Style */}
           <div className="space-y-2">
-            <Label>Estilo de Arte</Label>
+            <Label>Art Style</Label>
             <Select defaultValue={artStyles[0]}>
               <SelectTrigger className="bg-secondary/50">
                 <SelectValue />
@@ -126,7 +126,7 @@ export function AIGenerationPanel() {
 
           {/* Genre */}
           <div className="space-y-2">
-            <Label>Gênero</Label>
+            <Label>Genre</Label>
             <Select defaultValue={genres[0]}>
               <SelectTrigger className="bg-secondary/50">
                 <SelectValue />
@@ -143,7 +143,7 @@ export function AIGenerationPanel() {
 
           {/* Pixel Size */}
           <div className="space-y-2">
-            <Label>Tamanho do Pixel</Label>
+            <Label>Pixel Size</Label>
             <Select defaultValue={pixelSizes[2]}>
               <SelectTrigger className="bg-secondary/50">
                 <SelectValue />
@@ -160,7 +160,7 @@ export function AIGenerationPanel() {
 
           {/* Animation */}
           <div className="space-y-2">
-            <Label>Animação</Label>
+            <Label>Animation</Label>
             <Select defaultValue={animationTypes[0]}>
               <SelectTrigger className="bg-secondary/50">
                 <SelectValue />
@@ -178,7 +178,7 @@ export function AIGenerationPanel() {
 
         {/* Palette Selection */}
         <div className="space-y-2">
-          <Label>Paleta de Cores</Label>
+          <Label>Color Palette</Label>
           <div className="grid grid-cols-2 gap-2">
             {palettes.map((palette, i) => (
               <button
@@ -208,7 +208,7 @@ export function AIGenerationPanel() {
 
         {/* Perspective */}
         <div className="space-y-2">
-          <Label>Perspectiva de Câmera</Label>
+          <Label>Camera Perspective</Label>
           <div className="grid grid-cols-4 gap-2">
             {perspectives.map((p) => (
               <button
@@ -230,7 +230,7 @@ export function AIGenerationPanel() {
         {/* Detail Level */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label>Nível de Detalhe</Label>
+            <Label>Detail Level</Label>
             <span className="text-xs text-muted-foreground">75%</span>
           </div>
           <Slider defaultValue={[75]} max={100} step={5} className="w-full" />
@@ -246,12 +246,12 @@ export function AIGenerationPanel() {
             {isGenerating ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Gerando...
+                Generating...
               </>
             ) : (
               <>
                 <Wand2 className="w-4 h-4 mr-2" />
-                Gerar Asset
+                Generate Asset
               </>
             )}
           </Button>

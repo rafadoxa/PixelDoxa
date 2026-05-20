@@ -123,10 +123,10 @@ export function PixelEditor() {
               className="mx-auto w-64 h-64 rounded-lg bg-background relative overflow-hidden"
               style={{
                 backgroundImage: gridVisible ? `
-                  linear-gradient(45deg, oklch(0.15 0.01 260) 25%, transparent 25%),
-                  linear-gradient(-45deg, oklch(0.15 0.01 260) 25%, transparent 25%),
-                  linear-gradient(45deg, transparent 75%, oklch(0.15 0.01 260) 75%),
-                  linear-gradient(-45deg, transparent 75%, oklch(0.15 0.01 260) 75%)
+                  linear-gradient(45deg, hsl(240 10% 12%) 25%, transparent 25%),
+                  linear-gradient(-45deg, hsl(240 10% 12%) 25%, transparent 25%),
+                  linear-gradient(45deg, transparent 75%, hsl(240 10% 12%) 75%),
+                  linear-gradient(-45deg, transparent 75%, hsl(240 10% 12%) 75%)
                 ` : undefined,
                 backgroundSize: '16px 16px',
                 backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px'

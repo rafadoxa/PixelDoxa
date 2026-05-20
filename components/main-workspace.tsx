@@ -18,10 +18,10 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 const workspaceTabs = [
-  { id: "sprite", label: "Preview de Sprite", icon: User },
-  { id: "animation", label: "Preview de Animação", icon: Play },
-  { id: "tilemap", label: "Preview de Tilemap", icon: Grid3X3 },
-  { id: "editor", label: "Canvas do Editor", icon: Layers },
+  { id: "sprite", label: "Sprite Preview", icon: User },
+  { id: "animation", label: "Animation Preview", icon: Play },
+  { id: "tilemap", label: "Tilemap Preview", icon: Grid3X3 },
+  { id: "editor", label: "Editor Canvas", icon: Layers },
 ]
 
 // Pixel art character preview (simple pixel grid)
@@ -47,12 +47,12 @@ function PixelArtPreview() {
 
   const colors: Record<number, string> = {
     0: "transparent",
-    1: "oklch(0.25 0.02 260)", // outline
-    2: "oklch(0.75 0.15 80)", // skin
-    3: "oklch(0.3 0.1 260)", // eyes
-    4: "oklch(0.6 0.2 15)", // mouth
-    5: "oklch(0.5 0.2 280)", // shirt
-    6: "oklch(0.35 0.1 250)", // pants
+    1: "hsl(240 12% 18%)", // outline
+    2: "hsl(35 75% 65%)", // skin
+    3: "hsl(240 40% 25%)", // eyes
+    4: "hsl(5 70% 55%)", // mouth
+    5: "hsl(270 55% 50%)", // shirt
+    6: "hsl(245 40% 35%)", // pants
   }
 
   return (
@@ -134,10 +134,10 @@ function TilemapPreview() {
   )
 
   const tileColors = [
-    "oklch(0.35 0.1 145)", // grass
-    "oklch(0.45 0.05 80)", // dirt
-    "oklch(0.5 0.15 210)", // water
-    "oklch(0.3 0.02 260)", // stone
+    "hsl(130 40% 30%)", // grass
+    "hsl(35 30% 40%)", // dirt
+    "hsl(210 55% 45%)", // water
+    "hsl(240 8% 28%)", // stone
   ]
 
   return (
@@ -172,8 +172,8 @@ function EditorCanvasPreview() {
           className="w-64 h-64 md:w-80 md:h-80 rounded-lg bg-secondary/50"
           style={{
             backgroundImage: `
-              linear-gradient(to right, oklch(0.3 0.02 260) 1px, transparent 1px),
-              linear-gradient(to bottom, oklch(0.3 0.02 260) 1px, transparent 1px)
+              linear-gradient(to right, hsl(240 8% 28%) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(240 8% 28%) 1px, transparent 1px)
             `,
             backgroundSize: '16px 16px'
           }}
@@ -199,7 +199,7 @@ export function MainWorkspace() {
     >
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b border-border bg-secondary/30">
-        <h3 className="text-sm font-semibold">Área de Trabalho</h3>
+        <h3 className="text-sm font-semibold">Workspace</h3>
         
         <div className="flex items-center gap-2">
           <Button

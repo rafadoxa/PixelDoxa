@@ -38,25 +38,25 @@ import { cn } from "@/lib/utils"
 const biomes = [
   { id: "mixed", icon: Map, label: "Overworld", color: "text-emerald-400" },
   { id: "dungeon", icon: Castle, label: "Dungeon", color: "text-purple-400" },
-  { id: "forest", icon: Trees, label: "Floresta", color: "text-green-400" },
-  { id: "mountain", icon: Mountain, label: "Montanha", color: "text-stone-400" },
-  { id: "village", icon: Building2, label: "Vila", color: "text-amber-400" },
-  { id: "ocean", icon: Waves, label: "Oceano", color: "text-blue-400" },
+  { id: "forest", icon: Trees, label: "Forest", color: "text-green-400" },
+  { id: "mountain", icon: Mountain, label: "Mountain", color: "text-stone-400" },
+  { id: "village", icon: Building2, label: "Village", color: "text-amber-400" },
+  { id: "ocean", icon: Waves, label: "Ocean", color: "text-blue-400" },
 ]
 
 const algorithms = [
-  { id: "wfc", label: "Wave Function Collapse", desc: "Restrições locais" },
-  { id: "perlin", label: "Perlin Noise", desc: "Terreno natural" },
-  { id: "cellular", label: "Cellular Automata", desc: "Cavernas orgânicas" },
-  { id: "bsp", label: "BSP Tree", desc: "Salas conectadas" },
-  { id: "drunkard", label: "Drunkard Walk", desc: "Caminhos aleatórios" },
+  { id: "wfc", label: "Wave Function Collapse", desc: "Local constraints" },
+  { id: "perlin", label: "Perlin Noise", desc: "Natural terrain" },
+  { id: "cellular", label: "Cellular Automata", desc: "Organic caves" },
+  { id: "bsp", label: "BSP Tree", desc: "Connected rooms" },
+  { id: "drunkard", label: "Drunkard Walk", desc: "Random paths" },
 ]
 
 const mapStats = [
   { label: "Tiles", value: "4,096" },
-  { label: "Biomas", value: "6" },
+  { label: "Biomes", value: "6" },
   { label: "POIs", value: "12" },
-  { label: "Caminhos", value: "8" },
+  { label: "Paths", value: "8" },
 ]
 
 export function ProceduralGenerator() {
@@ -103,8 +103,8 @@ export function ProceduralGenerator() {
             <Map className="w-5 h-5 text-accent" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold">Gerador Procedural de Mundos</h3>
-            <p className="text-xs text-muted-foreground">Crie mundos únicos com algoritmos avançados</p>
+            <h3 className="text-sm font-semibold">Procedural World Generator</h3>
+            <p className="text-xs text-muted-foreground">Create unique worlds with advanced algorithms</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -165,8 +165,8 @@ export function ProceduralGenerator() {
                     className="w-12 h-12 mx-auto border-2 border-accent border-t-transparent rounded-full"
                   />
                   <div>
-                    <p className="text-sm font-medium">Gerando terreno...</p>
-                    <p className="text-xs text-muted-foreground mt-1">Wave Function Collapse em execução</p>
+                  <p className="text-sm font-medium">Generating terrain...</p>
+                  <p className="text-xs text-muted-foreground mt-1">Wave Function Collapse running</p>
                   </div>
                   <div className="w-48 h-2 bg-secondary rounded-full overflow-hidden">
                     <motion.div 
@@ -239,14 +239,14 @@ export function ProceduralGenerator() {
               animate={{ opacity: 1, x: 0 }}
               className="absolute bottom-4 right-4 bg-background/90 backdrop-blur-sm rounded-lg p-3 shadow-lg"
             >
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Biomas Detectados</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Detected Biomes</p>
               <div className="space-y-1.5">
                 {[
-                  { color: "bg-emerald-500", label: "Floresta", percent: "35%" },
-                  { color: "bg-stone-500", label: "Montanha", percent: "25%" },
-                  { color: "bg-blue-400", label: "Água", percent: "20%" },
-                  { color: "bg-amber-600", label: "Planície", percent: "15%" },
-                  { color: "bg-yellow-200", label: "Praia", percent: "5%" },
+                  { color: "bg-emerald-500", label: "Forest", percent: "35%" },
+                  { color: "bg-stone-500", label: "Mountain", percent: "25%" },
+                  { color: "bg-blue-400", label: "Water", percent: "20%" },
+                  { color: "bg-amber-600", label: "Plains", percent: "15%" },
+                  { color: "bg-yellow-200", label: "Beach", percent: "5%" },
                 ].map((biome) => (
                   <div key={biome.label} className="flex items-center gap-2 text-xs">
                     <div className={cn("w-3 h-3 rounded", biome.color)} />
@@ -263,7 +263,7 @@ export function ProceduralGenerator() {
         <div className="w-full lg:w-80 p-4 space-y-5 border-t lg:border-t-0 lg:border-l border-border bg-secondary/20">
           {/* Biome Selection */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium">Tipo de Mundo</Label>
+            <Label className="text-xs font-medium">World Type</Label>
             <div className="grid grid-cols-3 gap-2">
               {biomes.map((biome) => {
                 const Icon = biome.icon
@@ -288,7 +288,7 @@ export function ProceduralGenerator() {
 
           {/* Algorithm Selection */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium">Algoritmo de Geração</Label>
+            <Label className="text-xs font-medium">Generation Algorithm</Label>
             <div className="space-y-1.5">
               {algorithms.slice(0, 3).map((algo) => (
                 <button
@@ -310,11 +310,11 @@ export function ProceduralGenerator() {
 
           {/* Size Controls */}
           <div className="space-y-3">
-            <Label className="text-xs font-medium">Dimensões do Mapa</Label>
+            <Label className="text-xs font-medium">Map Dimensions</Label>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Largura</span>
+                  <span className="text-muted-foreground">Width</span>
                   <span className="font-mono text-accent">{mapWidth}px</span>
                 </div>
                 <Slider 
@@ -328,7 +328,7 @@ export function ProceduralGenerator() {
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Altura</span>
+                  <span className="text-muted-foreground">Height</span>
                   <span className="font-mono text-accent">{mapHeight}px</span>
                 </div>
                 <Slider 
@@ -346,7 +346,7 @@ export function ProceduralGenerator() {
           {/* Density */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs">
-              <Label className="font-medium">Densidade de Detalhes</Label>
+              <Label className="font-medium">Detail Density</Label>
               <span className="font-mono text-accent">{density}%</span>
             </div>
             <Slider 
@@ -363,21 +363,21 @@ export function ProceduralGenerator() {
           <div className="pt-3 border-t border-border space-y-3">
             <div className="flex items-center gap-2">
               <Settings2 className="w-4 h-4 text-accent" />
-              <span className="text-xs font-medium">Controles WFC</span>
+              <span className="text-xs font-medium">WFC Controls</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <Button variant="secondary" size="sm" className="text-xs h-9">
                 <Play className="w-3 h-3 mr-1.5" />
-                Passo Único
+                Single Step
               </Button>
               <Button variant="secondary" size="sm" className="text-xs h-9">
                 <Pause className="w-3 h-3 mr-1.5" />
-                Pausar
+                Pause
               </Button>
             </div>
             <Button variant="secondary" size="sm" className="w-full text-xs h-9">
               <Eye className="w-3 h-3 mr-1.5" />
-              Visualizar Propagação
+              View Propagation
             </Button>
           </div>
 
@@ -389,14 +389,14 @@ export function ProceduralGenerator() {
               className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground text-sm h-10 font-medium"
             >
               {isGenerating ? (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Gerando...
-                </>
-              ) : (
-                <>
-                  <Shuffle className="w-4 h-4 mr-2" />
-                  Gerar Mundo
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Shuffle className="w-4 h-4 mr-2" />
+                Generate World
                 </>
               )}
             </Button>
